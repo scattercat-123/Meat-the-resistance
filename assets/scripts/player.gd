@@ -36,6 +36,10 @@ func _physics_process(_delta: float) -> void:
 	velocity = dir.normalized() * speed
 	move_and_slide()
 
+	var b := GameManager.arena_bound
+	global_position.x = clamp(global_position.x, -b.x, b.x)
+	global_position.y = clamp(global_position.y, -b.y, b.y)
+
 	if can_attack and Input.is_action_just_pressed("attack"):
 		attack()
 

@@ -1,6 +1,6 @@
 extends Node2D
 
-const ENEMY_SCENE := preload("res://Assets/scenes/enemy.tscn")
+const ENEMY_SCENE := preload("res://assets/scenes/enemy.tscn")
 
 const UPGRADES := [
 	{"name": "Bigger steak", "desc": "+10 damage"},
@@ -10,8 +10,6 @@ const UPGRADES := [
 	{"name": "Flaming steak", "desc": "+15 damage, longer swing"},
 	{"name": "Long reach", "desc": "bigger hitbox, faster swing"},
 ]
-
-@export var spawn_radius := 400.0
 
 var wave := 0
 var enemies_to_spawn := 0
@@ -63,10 +61,17 @@ func _spawn_one() -> void:
 	var enemy := ENEMY_SCENE.instantiate()
 	enemy.speed += wave * 5.0
 	enemy.max_health += wave * 5.0
-	var angle := randf() * TAU
-	enemy.global_position = Vector2(cos(angle), sin(angle)) * spawn_radius
+	enemy.global_position = _edge_spawn_point()
 	add_child(enemy)
 	GameManager.enemies_alive += 1
+
+func _edge_spawn_point() -> Vector2:
+	var b := GameManager.arena_bound
+	match randi() % 4:
+		0: return Vector2(randf_range(-b.x, b.x), -b.y)
+		1: return Vector2(randf_range(-b.x, b.x), b.y)
+		2: return Vector2(-b.x, randf_range(-b.y, b.y))
+		_: return Vector2(b.x, randf_range(-b.y, b.y))
 
 func _check_wave_clear() -> void:
 	if GameManager.enemies_alive <= 0 and enemies_to_spawn <= 0:
