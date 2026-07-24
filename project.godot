@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="Meat the resistance"
-run/main_scene="uid://bax0lb0cb0686"
+run/main_scene="res://assets/scenes/arena.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*res://Assets/scripts/game_manager.gd"
+
+GameManager="*res://assets/scripts/game_manager.gd"
 
 [display]
 
