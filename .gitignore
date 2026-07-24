@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 bin/
 obj/
 /packages/
@@ -23,3 +24,7 @@ data_*/
 mono_crash.*.json
 *.sln
 .idea/
+=======
+.notes/
+.md
+>>>>>>> 076bfd41c058659f3f78230ad570fbaef8261fbe
