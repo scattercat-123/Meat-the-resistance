@@ -1,7 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/player.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/HumanSteak_Raw.webp" id="3"]
+[ext_resource type="Script" uid="uid://wbfxhr3tele5" path="res://Assets/scripts/player.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://b6uxwhs3aoxxx" path="res://assets/HumanSteak_Raw.webp" id="3"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 16.0
