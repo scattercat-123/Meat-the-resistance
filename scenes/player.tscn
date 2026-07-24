@@ -29,3 +29,11 @@ monitoring = false
 [node name="WeaponShape" type="CollisionShape2D" parent="WeaponHitbox"]
 position = Vector2(40, 0)
 shape = SubResource("2")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+
+[node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("1")
