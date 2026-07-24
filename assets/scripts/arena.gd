@@ -1,6 +1,6 @@
 extends Node2D
 
-const ENEMY_SCENE := preload("res://scenes/enemy.tscn")
+const ENEMY_SCENE := preload("res://Assets/scenes/enemy.tscn")
 
 const UPGRADES := [
 	{"name": "Bigger steak", "desc": "+10 damage"},

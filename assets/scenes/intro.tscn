@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://ingjyfwfde6x" path="res://Assets/images/HumanSteak_Raw.png" id="2_w8vp1"]
 [ext_resource type="Texture2D" uid="uid://v0f5k71vray0" path="res://Assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png" id="3_rckak"]
 [ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://Assets/fonts/pixelart.ttf" id="4_ts36g"]
+[ext_resource type="Script" uid="uid://cief84a7ysoyp" path="res://Assets/scripts/menu.gd" id="4_w8vp1"]
 
 [sub_resource type="Animation" id="Animation_58f7j"]
 length = 0.001
@@ -138,10 +139,20 @@ _data = {
 &"intro": SubResource("Animation_lpjq1")
 }
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rckak"]
+size = Vector2(642, 109)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ts36g"]
+size = Vector2(629, 81)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_58f7j"]
+size = Vector2(637, 92)
+
 [node name="Intro" type="Node2D" unique_id=810112856]
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1028948397]
 libraries/ = SubResource("AnimationLibrary_5qfp7")
+autoplay = &"intro"
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=288175407]
 offset_right = 1920.0
@@ -208,6 +219,7 @@ texture = ExtResource("3_rckak")
 [node name="Menu" type="Node2D" parent="." unique_id=1982406687]
 position = Vector2(564.00006, -1071)
 rotation = 0.17453292
+script = ExtResource("4_w8vp1")
 
 [node name="Play" type="Label" parent="Menu" unique_id=1378055310]
 offset_left = 992.0
@@ -219,11 +231,11 @@ theme_override_font_sizes/font_size = 100
 text = "Play Game"
 horizontal_alignment = 2
 
-[node name="Bar" type="ColorRect" parent="Menu" unique_id=1717856324]
-offset_left = 1641.0
-offset_top = 479.0
-offset_right = 1664.0
-offset_bottom = 890.0
+[node name="play area" type="Area2D" parent="Menu/Play" unique_id=137573014]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Menu/Play/play area" unique_id=546023091]
+position = Vector2(311, 44.5)
+shape = SubResource("RectangleShape2D_rckak")
 
 [node name="Crediys" type="Label" parent="Menu" unique_id=1247529538]
 offset_left = 992.0
@@ -235,6 +247,12 @@ theme_override_font_sizes/font_size = 100
 text = "Credits"
 horizontal_alignment = 2
 
+[node name="credits_area" type="Area2D" parent="Menu/Crediys" unique_id=1745879652]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Menu/Crediys/credits_area" unique_id=430810423]
+position = Vector2(304.5, 51.5)
+shape = SubResource("RectangleShape2D_ts36g")
+
 [node name="settings" type="Label" parent="Menu" unique_id=630696974]
 offset_left = 992.0
 offset_top = 648.0
@@ -244,3 +262,25 @@ theme_override_fonts/font = ExtResource("4_ts36g")
 theme_override_font_sizes/font_size = 100
 text = "Settings"
 horizontal_alignment = 2
+
+[node name="settings_area" type="Area2D" parent="Menu/settings" unique_id=722936322]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Menu/settings/settings_area" unique_id=452086321]
+position = Vector2(313, 54)
+shape = SubResource("RectangleShape2D_58f7j")
+
+[node name="Bar" type="ColorRect" parent="Menu" unique_id=1717856324]
+offset_left = 1641.0
+offset_top = 479.0
+offset_right = 1664.0
+offset_bottom = 890.0
+
+[node name="mouse_pos" type="Marker2D" parent="Menu" unique_id=1143655075]
+position = Vector2(1294, 509)
+
+[connection signal="mouse_entered" from="Menu/Play/play area" to="Menu" method="_on_play_area_mouse_entered"]
+[connection signal="mouse_exited" from="Menu/Play/play area" to="Menu" method="_on_play_area_mouse_exited"]
+[connection signal="mouse_entered" from="Menu/Crediys/credits_area" to="Menu" method="_on_credits_area_mouse_entered"]
+[connection signal="mouse_exited" from="Menu/Crediys/credits_area" to="Menu" method="_on_credits_area_mouse_exited"]
+[connection signal="mouse_entered" from="Menu/settings/settings_area" to="Menu" method="_on_settings_area_mouse_entered"]
+[connection signal="mouse_exited" from="Menu/settings/settings_area" to="Menu" method="_on_settings_area_mouse_exited"]
