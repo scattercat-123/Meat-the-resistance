@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ingjyfwfde6x"
-path="res://.godot/imported/HumanSteak_Raw.png-ef107876d63d4cc9f9cda5055c52e568.ctex"
+uid="uid://v0f5k71vray0"
+path="res://.godot/imported/cibercafe_enigma_front_06_asepritefile-spritesheet.png-64f5cdcc3d61a4f2d29e598b163f8a6b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/HumanSteak_Raw.png"
-dest_files=["res://.godot/imported/HumanSteak_Raw.png-ef107876d63d4cc9f9cda5055c52e568.ctex"]
+source_file="res://assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png"
+dest_files=["res://.godot/imported/cibercafe_enigma_front_06_asepritefile-spritesheet.png-64f5cdcc3d61a4f2d29e598b163f8a6b.ctex"]
 
 [params]
 

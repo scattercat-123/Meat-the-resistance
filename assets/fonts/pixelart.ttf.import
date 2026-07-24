@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://r7gwhsuio0da"
-path="res://.godot/imported/Singsong.otf-352805f9ac24c8b2d4b5f8a284796e0c.fontdata"
+uid="uid://de8lrrx0a8d71"
+path="res://.godot/imported/pixelart.ttf-b7329b6ac137170b92192166f29cc99e.fontdata"
 
 [deps]
 
-source_file="res://Assets/fonts/Singsong.otf"
-dest_files=["res://.godot/imported/Singsong.otf-352805f9ac24c8b2d4b5f8a284796e0c.fontdata"]
+source_file="res://assets/fonts/pixelart.ttf"
+dest_files=["res://.godot/imported/pixelart.ttf-b7329b6ac137170b92192166f29cc99e.fontdata"]
 
 [params]
 
