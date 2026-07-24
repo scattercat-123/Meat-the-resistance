@@ -1,0 +1,246 @@
+[gd_scene format=3 uid="uid://bax0lb0cb0686"]
+
+[ext_resource type="FontFile" uid="uid://r7gwhsuio0da" path="res://Assets/fonts/Singsong.otf" id="1_egymn"]
+[ext_resource type="Texture2D" uid="uid://ingjyfwfde6x" path="res://Assets/images/HumanSteak_Raw.png" id="2_w8vp1"]
+[ext_resource type="Texture2D" uid="uid://v0f5k71vray0" path="res://Assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png" id="3_rckak"]
+[ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://Assets/fonts/pixelart.ttf" id="4_ts36g"]
+
+[sub_resource type="Animation" id="Animation_58f7j"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Warning texts:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Vegan Games:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Background:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0.7764706, 0.7764706, 0.7764706, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Menu:position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(564.00006, -1071)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Menu:rotation")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.17453292]
+}
+
+[sub_resource type="Animation" id="Animation_lpjq1"]
+resource_name = "intro"
+length = 10.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Warning texts:modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Vegan Games:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(2, 3, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Background:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(4, 5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.7764706, 0.7764706, 0.7764706, 0), Color(0.7764706, 0.7764706, 0.7764706, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Menu:position")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(4.55, 5.28),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(564.00006, -1071), Vector2(-6, -20)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Menu:rotation")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(4.55, 5.28),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.17453292, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_5qfp7"]
+_data = {
+&"RESET": SubResource("Animation_58f7j"),
+&"intro": SubResource("Animation_lpjq1")
+}
+
+[node name="Intro" type="Node2D" unique_id=810112856]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1028948397]
+libraries/ = SubResource("AnimationLibrary_5qfp7")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=288175407]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0, 0, 0, 1)
+
+[node name="Warning texts" type="Node2D" parent="." unique_id=296468141]
+modulate = Color(1, 1, 1, 0)
+
+[node name="Label" type="Label" parent="Warning texts" unique_id=208293297]
+offset_right = 1920.0
+offset_bottom = 1080.0
+theme_override_font_sizes/font_size = 100
+text = "!!Warning!!
+DO NOT PLAY THIS IF YOU ARE VEGAN
+This game might contain scenes which might scare some groups of people. If you experience any health issues such as eye strain visit a doctor immediately. "
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="Warning texts" unique_id=1355481251]
+offset_left = 1338.0
+offset_top = 977.0
+offset_right = 1910.0
+offset_bottom = 1064.0
+theme_override_colors/font_color = Color(0.646029, 0.646029, 0.646029, 1)
+theme_override_font_sizes/font_size = 30
+text = "This is not real medical advice and play this at your own risk."
+horizontal_alignment = 2
+autowrap_mode = 3
+
+[node name="Vegan Games" type="Node2D" parent="." unique_id=848146876]
+modulate = Color(1, 1, 1, 0)
+
+[node name="Label3" type="Label" parent="Vegan Games" unique_id=1341042858]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 478.0
+offset_top = 657.0
+offset_right = 1442.0
+offset_bottom = 807.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("1_egymn")
+theme_override_font_sizes/font_size = 125
+text = "Vegan Games"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HumanSteakRaw" type="Sprite2D" parent="Vegan Games" unique_id=460823458]
+position = Vector2(971, 445)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_w8vp1")
+
+[node name="Background" type="Sprite2D" parent="." unique_id=936357526]
+modulate = Color(0.7764706, 0.7764706, 0.7764706, 0)
+position = Vector2(960, 540)
+scale = Vector2(6, 6)
+texture = ExtResource("3_rckak")
+
+[node name="Menu" type="Node2D" parent="." unique_id=1982406687]
+position = Vector2(564.00006, -1071)
+rotation = 0.17453292
+
+[node name="Play" type="Label" parent="Menu" unique_id=1378055310]
+offset_left = 992.0
+offset_top = 453.0
+offset_right = 1617.0
+offset_bottom = 541.0
+theme_override_fonts/font = ExtResource("4_ts36g")
+theme_override_font_sizes/font_size = 100
+text = "Play Game"
+horizontal_alignment = 2
+
+[node name="Bar" type="ColorRect" parent="Menu" unique_id=1717856324]
+offset_left = 1641.0
+offset_top = 479.0
+offset_right = 1664.0
+offset_bottom = 890.0
+
+[node name="Crediys" type="Label" parent="Menu" unique_id=1247529538]
+offset_left = 992.0
+offset_top = 553.0
+offset_right = 1617.0
+offset_bottom = 641.0
+theme_override_fonts/font = ExtResource("4_ts36g")
+theme_override_font_sizes/font_size = 100
+text = "Credits"
+horizontal_alignment = 2
+
+[node name="settings" type="Label" parent="Menu" unique_id=630696974]
+offset_left = 992.0
+offset_top = 648.0
+offset_right = 1617.0
+offset_bottom = 736.0
+theme_override_fonts/font = ExtResource("4_ts36g")
+theme_override_font_sizes/font_size = 100
+text = "Settings"
+horizontal_alignment = 2
