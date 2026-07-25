@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://bx8t58svlciqx"]
+
+[ext_resource type="Script" uid="uid://bjwvfbitfeqlp" path="res://Assets/scripts/music.gd" id="1_m3ljg"]
+[ext_resource type="AudioStream" uid="uid://cxhuqxttllt3x" path="res://Assets/audio/the_mountain-game-game-music-508018.mp3" id="2_s02n2"]
+[ext_resource type="AudioStream" uid="uid://b6rtdpo5rl5up" path="res://Assets/audio/hauntsync-combat-fast-paced-8-bit-chiptune-for-action-games-374457.mp3" id="3_tkw3o"]
+[ext_resource type="AudioStream" uid="uid://ctksn3l44g27h" path="res://Assets/audio/hauntsync-heavy-doom-metal-instrumental-for-intense-combat-331738.mp3" id="4_v2sk6"]
+[ext_resource type="AudioStream" uid="uid://bel7uc7mxfy44" path="res://Assets/audio/mondamusic-retro-arcade-game-music-512837.mp3" id="5_n06id"]
+[ext_resource type="AudioStream" uid="uid://10kktolgyjvb" path="res://Assets/audio/phatphrogstudio-samurai-spirit-cursed-oni-edm-royalty-free-music-502868.mp3" id="6_h5akl"]
+[ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://Assets/fonts/pixelart.ttf" id="7_oj1jf"]
+[ext_resource type="Texture2D" uid="uid://c5ph05hgy6pxo" path="res://Assets/images/noun-music-note-6193360.png" id="8_5li8n"]
+[ext_resource type="Texture2D" uid="uid://dkq3tx8iy7f2b" path="res://Assets/images/noun-play-2009520.png" id="9_sdkk2"]
+[ext_resource type="Texture2D" uid="uid://clmgevgww4xqx" path="res://Assets/images/noun-pause-2009522.png" id="10_46eqk"]
+[ext_resource type="Texture2D" uid="uid://c6xny0s8e3tbo" path="res://Assets/images/noun-fast-backward-2009518.png" id="11_4qnfc"]
+[ext_resource type="Texture2D" uid="uid://bgimlmfiiydsj" path="res://Assets/images/noun-fast-forward-2009519.png" id="12_nrren"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vffxm"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.3403393, 0.34033933, 0.3403393, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+corner_detail = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3wpbt"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(1, 1, 1, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+corner_detail = 6
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sxsps"]
+size = Vector2(509.9995, 480)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xgib5"]
+size = Vector2(40.99997, 54)
+
+[node name="Music" type="Node2D" unique_id=429765256]
+script = ExtResource("1_m3ljg")
+
+[node name="1" type="AudioStreamPlayer" parent="." unique_id=416766769]
+stream = ExtResource("2_s02n2")
+
+[node name="2" type="AudioStreamPlayer" parent="." unique_id=394203959]
+stream = ExtResource("3_tkw3o")
+
+[node name="3" type="AudioStreamPlayer" parent="." unique_id=281640934]
+stream = ExtResource("4_v2sk6")
+
+[node name="4" type="AudioStreamPlayer" parent="." unique_id=313197033]
+stream = ExtResource("5_n06id")
+
+[node name="5" type="AudioStreamPlayer" parent="." unique_id=2084478445]
+stream = ExtResource("6_h5akl")
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=918837399]
+offset_left = 57.99997
+offset_top = 1046.0
+offset_right = 494.99997
+offset_bottom = 1073.0
+scale = Vector2(1, 0.5)
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9490196, 0.9490196, 0.9490196, 0)
+theme_override_styles/background = SubResource("StyleBoxFlat_vffxm")
+theme_override_styles/fill = SubResource("StyleBoxFlat_3wpbt")
+
+[node name="Label" type="Label" parent="." unique_id=610678675]
+offset_left = 503.99997
+offset_top = 1039.0
+offset_right = 797.0
+offset_bottom = 1066.0
+theme_override_fonts/font = ExtResource("7_oj1jf")
+theme_override_font_sizes/font_size = 25
+text = "The mountain game"
+
+[node name="music_note" type="Sprite2D" parent="." unique_id=972548881]
+position = Vector2(35, 1044)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("8_5li8n")
+
+[node name="paused" type="Sprite2D" parent="." unique_id=1671162899]
+visible = false
+position = Vector2(274.99997, 1021)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("9_sdkk2")
+
+[node name="playing" type="Sprite2D" parent="." unique_id=1751483486]
+position = Vector2(277.99997, 1020)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("10_46eqk")
+
+[node name="back" type="Sprite2D" parent="." unique_id=511371832]
+position = Vector2(218.99997, 1022)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("11_4qnfc")
+
+[node name="back_area" type="Area2D" parent="back" unique_id=2122043183]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="back/back_area" unique_id=627477836]
+position = Vector2(15.000732, -50)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_sxsps")
+
+[node name="front" type="Sprite2D" parent="." unique_id=340368014]
+position = Vector2(330.99997, 1021)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("12_nrren")
+
+[node name="front_area" type="Area2D" parent="front" unique_id=433376503]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="front/front_area" unique_id=1858131191]
+position = Vector2(15.000732, -50)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_sxsps")
+
+[node name="pause_area" type="Area2D" parent="." unique_id=1872397892]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="pause_area" unique_id=1256884447]
+position = Vector2(279, 1017)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_xgib5")
+
+[connection signal="mouse_entered" from="pause_area" to="." method="_on_pause_area_mouse_entered"]
+[connection signal="mouse_exited" from="pause_area" to="." method="_on_pause_area_mouse_exited"]

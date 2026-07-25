@@ -9,6 +9,7 @@ var credits_hover = false
 var settings_hover = false
 var skippable = false
 
+
 func _ready() -> void:
 	Input.warp_mouse(mouse_pos.position)
 
