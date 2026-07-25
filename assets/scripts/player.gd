@@ -13,6 +13,9 @@ const SLASH_FPS := 14.0
 @export var attack_damage := 15.0
 @export var attack_cooldown := 0.25
 @export var max_health := 100.0
+@export var dash_speed := 780.0
+@export var dash_time := 0.18
+@export var dash_cooldown := 0.8
 
 @onready var anim: AnimatedSprite2D = $Anim
 @onready var weapon_anim: AnimatedSprite2D = $WeaponAnim
@@ -24,6 +27,9 @@ const SLASH_FPS := 14.0
 var health := 0.0
 var can_attack := true
 var attacking := false
+var dashing := false
+var can_dash := true
+var dash_dir := Vector2.DOWN
 var facing := Vector2.DOWN
 var damage_cooldown: Timer
 
@@ -48,6 +54,8 @@ func _build_char_frames() -> SpriteFrames:
 		_add_sheet(sf, dir_name, CHAR_DIR + "Character_" + dir_name + ".png", 4, 32, 8.0)
 	for dir_name in SLASH_DIRS:
 		_add_sheet(sf, "Slash" + dir_name, CHAR_DIR + "Character_Slash" + dir_name + ".png", 5, 32, SLASH_FPS)
+	for dir_name in DIRECTIONS:
+		_add_sheet(sf, "Roll" + dir_name, CHAR_DIR + "Character_Roll" + dir_name + ".png", 4, 32, 4.0 / dash_time)
 	return sf
 
 func _build_weapon_frames() -> SpriteFrames:
@@ -60,7 +68,8 @@ func _add_sheet(sf: SpriteFrames, anim_name: String, path: String, count: int, s
 	var tex: Texture2D = load(path)
 	sf.add_animation(anim_name)
 	sf.set_animation_speed(anim_name, fps)
-	sf.set_animation_loop(anim_name, false if anim_name.begins_with("Slash") or size == 64 else true)
+	var one_shot := anim_name.begins_with("Slash") or anim_name.begins_with("Roll") or size == 64
+	sf.set_animation_loop(anim_name, not one_shot)
 	for i in count:
 		var at := AtlasTexture.new()
 		at.atlas = tex
@@ -72,31 +81,49 @@ func _physics_process(_delta: float) -> void:
 		Input.get_axis("move_left", "move_right"),
 		Input.get_axis("move_up", "move_down")
 	)
-	velocity = dir.normalized() * speed
+
+	if dashing:
+		velocity = dash_dir * dash_speed
+	else:
+		velocity = dir.normalized() * speed
 	move_and_slide()
 
 	var b := GameManager.arena_bound
 	global_position.x = clamp(global_position.x, -b.x, b.x)
 	global_position.y = clamp(global_position.y, -b.y, b.y)
 
-	if dir != Vector2.ZERO:
+	if dir != Vector2.ZERO and not dashing:
 		facing = dir.normalized()
-		aim.rotation = facing.angle()
 		if facing.x != 0.0:
 			var s := 1.0 if facing.x > 0.0 else -1.0
 			steak.flip_h = s < 0.0
 			steak.position.x = 34.0 * s
 			steak.rotation = 0.3 * s
 
-	if not attacking:
+	if not attacking and not dashing:
 		if dir != Vector2.ZERO:
 			anim.play(_anim_name(facing))
 		else:
 			anim.stop()
 			anim.frame = 0
 
-	if can_attack and Input.is_action_just_pressed("attack"):
+	if can_dash and not dashing and Input.is_action_just_pressed("dash"):
+		dash(dir)
+
+	if can_attack and not dashing and Input.is_action_just_pressed("attack"):
 		attack()
+
+func dash(dir: Vector2) -> void:
+	can_dash = false
+	dashing = true
+	dash_dir = dir.normalized() if dir != Vector2.ZERO else facing
+	hurtbox.monitoring = false
+	anim.play("Roll" + _anim_name(dash_dir))
+	await get_tree().create_timer(dash_time).timeout
+	dashing = false
+	hurtbox.monitoring = true
+	await get_tree().create_timer(dash_cooldown).timeout
+	can_dash = true
 
 func _anim_name(d: Vector2) -> String:
 	var deg := rad_to_deg(d.angle())
@@ -109,15 +136,17 @@ func _anim_name(d: Vector2) -> String:
 	if deg >= -157.5 and deg < -112.5: return "UpLeft"
 	return "Left"
 
-func _slash_dir() -> String:
-	var v := "Down" if facing.y >= 0.0 else "Up"
-	var h := "Right" if facing.x >= 0.0 else "Left"
+func _slash_dir(d: Vector2) -> String:
+	var v := "Down" if d.y >= 0.0 else "Up"
+	var h := "Right" if d.x >= 0.0 else "Left"
 	return v + h
 
 func attack() -> void:
 	can_attack = false
 	attacking = true
-	var d := _slash_dir()
+	var aim_dir := (get_global_mouse_position() - global_position).normalized()
+	aim.rotation = aim_dir.angle()
+	var d := _slash_dir(aim_dir)
 	anim.play("Slash" + d)
 	steak.visible = false
 	weapon_anim.visible = true
