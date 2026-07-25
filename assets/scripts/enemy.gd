@@ -44,6 +44,7 @@ func _ready() -> void:
 	change_state_timer.start()
 	speed *= randf_range(0.85, 1.2)
 	base_speed = speed
+	sprite.speed_scale = randf_range(0.85, 1.15)
 	dash_timer = Timer.new()
 	dash_timer.one_shot = true
 	dash_timer.wait_time = randf_range(3.0, 8.0)
@@ -433,8 +434,8 @@ func _show_telegraph() -> void:
 	telegraph.z_index = 5
 	var r := ColorRect.new()
 	var reach := DASH_SPEED * DASH_TIME + 60.0
-	r.size = Vector2(reach, 46)
-	r.position = Vector2(0, -23)
+	r.size = Vector2(reach, 54)
+	r.position = Vector2(0, -27)
 	r.color = Color(0.9, 0.15, 0.15, 0.3)
 	telegraph.add_child(r)
 	get_parent().add_child(telegraph)

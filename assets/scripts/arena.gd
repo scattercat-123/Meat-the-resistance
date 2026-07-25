@@ -205,7 +205,7 @@ func _start_wave() -> void:
 	wave_label.text = "Wave %d" % wave
 	if wave > 1:
 		player.heal(10.0)
-	enemies_to_spawn = 3 + int(wave * 1.3)
+	enemies_to_spawn = 3 + wave
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
 	GameManager.max_lob_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
