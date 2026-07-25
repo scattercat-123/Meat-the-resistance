@@ -30,6 +30,18 @@ func request_dash_slot() -> bool:
 func release_dash_slot() -> void:
 	dash_slots = min(dash_slots + 1, max_dash_slots)
 
+var lob_slots := 0
+var max_lob_slots := 0
+
+func request_lob_slot() -> bool:
+	if lob_slots > 0:
+		lob_slots -= 1
+		return true
+	return false
+
+func release_lob_slot() -> void:
+	lob_slots = min(lob_slots + 1, max_lob_slots)
+
 var _voices: Array[AudioStreamPlayer] = []
 
 func _ready() -> void:

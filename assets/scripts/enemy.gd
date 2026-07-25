@@ -29,6 +29,7 @@ var base_speed := 0.0
 var damage_bonus := 0.0
 var variant := "basic"
 var casting := false
+var lob_pending := false
 var dash_state := "none"
 var dash_dir := Vector2.ZERO
 var telegraph: Node2D
@@ -52,7 +53,7 @@ func _ready() -> void:
 
 	match variant:
 		"lobber":
-			_setup_ability(randf_range(2.0, 4.5), _try_lob)
+			_setup_ability(randf_range(2.5, 5.0), _try_lob)
 		"healer":
 			_setup_ability(2.2, _heal_pulse, false)
 
@@ -88,25 +89,35 @@ func make_variant(kind: String) -> void:
 
 func _try_lob() -> void:
 	var t: Timer = get_node("ability_timer")
-	t.wait_time = randf_range(3.0, 6.0)
+	t.wait_time = randf_range(4.0, 8.0)
 	t.start()
 	if dying or target == null or dash_state != "none" or casting:
 		return
-	if global_position.distance_to(target.global_position) > 850.0:
+	var dist := global_position.distance_to(target.global_position)
+	if dist > 850.0 or dist < 160.0:
 		return
+	if not GameManager.request_lob_slot():
+		return
+	lob_pending = true
 	casting = true
 	var tw := create_tween()
 	for i in 2:
-		tw.tween_property(sprite, "modulate", Color(0.6, 0.3, 1.0), 0.12)
-		tw.tween_property(sprite, "modulate", Color.WHITE, 0.12)
-	await get_tree().create_timer(0.5).timeout
+		tw.tween_property(sprite, "modulate", Color(0.6, 0.3, 1.0), 0.16)
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.16)
+	await get_tree().create_timer(0.65).timeout
 	casting = false
 	if dying or target == null:
+		if lob_pending:
+			lob_pending = false
+			GameManager.release_lob_slot()
 		return
+	lob_pending = false
 	_throw_eggplant()
 
 func _throw_eggplant() -> void:
 	var land: Vector2 = target.global_position
+	var tgt: Node2D = target
+	var dmg := 6.0 + damage_bonus * 0.7
 	GameManager.play("swing", -14.0)
 
 	var mark := Node2D.new()
@@ -126,7 +137,7 @@ func _throw_eggplant() -> void:
 	egg.z_index = 30
 	get_parent().add_child(egg)
 
-	var flight := global_position.distance_to(land) / 500.0
+	var flight := global_position.distance_to(land) / 420.0
 	var tws := egg.create_tween()
 	tws.tween_property(egg, "scale", Vector2(4.6, 4.6), flight * 0.5)
 	tws.tween_property(egg, "scale", Vector2(3, 3), flight * 0.5)
@@ -136,6 +147,7 @@ func _throw_eggplant() -> void:
 	tw.tween_property(egg, "rotation", TAU * 2.0, flight)
 	tw.chain().tween_callback(func():
 		mark.queue_free()
+		GameManager.release_lob_slot()
 		GameManager.play("splat", -4.0)
 		var p := CPUParticles2D.new()
 		p.one_shot = true
@@ -153,9 +165,9 @@ func _throw_eggplant() -> void:
 		p.position = land
 		p.z_index = 40
 		egg.get_parent().add_child(p)
-		get_tree().create_timer(0.5).timeout.connect(p.queue_free)
-		if is_instance_valid(target) and target.global_position.distance_to(land) < 70.0:
-			target.take_damage(10.0 + damage_bonus)
+		egg.get_tree().create_timer(0.5).timeout.connect(p.queue_free)
+		if is_instance_valid(tgt) and tgt.global_position.distance_to(land) < 60.0:
+			tgt.take_damage(dmg)
 		egg.queue_free()
 	)
 
@@ -298,6 +310,9 @@ func _spawn_splatter() -> void:
 
 func die() -> void:
 	dying = true
+	if lob_pending:
+		lob_pending = false
+		GameManager.release_lob_slot()
 	collision_layer = 0
 	contact_damage = 0.0
 	set_physics_process(false)

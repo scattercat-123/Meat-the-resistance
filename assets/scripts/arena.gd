@@ -46,6 +46,8 @@ func _ready() -> void:
 	GameManager.score = 0
 	GameManager.dash_slots = 0
 	GameManager.max_dash_slots = 0
+	GameManager.lob_slots = 0
+	GameManager.max_lob_slots = 0
 	player = $Player
 
 	spawn_timer = Timer.new()
@@ -206,6 +208,8 @@ func _start_wave() -> void:
 	enemies_to_spawn = 3 + int(wave * 1.3)
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
+	GameManager.max_lob_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
+	GameManager.lob_slots = GameManager.max_lob_slots
 	wave_size = enemies_to_spawn
 	wave_kills = 0
 	tomatoes_dropped = 0
@@ -223,13 +227,14 @@ func _spawn_one() -> void:
 	enemy.max_health += wave * 7.0 + wave * wave
 	enemy.damage_bonus = wave
 	var roll := randf()
+	var lob_chance := minf(0.10 + wave * 0.012, 0.20)
 	if wave >= 7 and roll < 0.15:
 		enemy.make_variant("tank")
 	elif wave >= 5 and roll < 0.27:
 		enemy.make_variant("healer")
-	elif wave >= 3 and roll < 0.47:
+	elif wave >= 3 and roll < 0.27 + lob_chance:
 		enemy.make_variant("lobber")
-	elif wave >= 4 and roll < 0.72:
+	elif wave >= 4 and roll < 0.52 + lob_chance:
 		enemy.make_variant("runner")
 	var first_of_run := wave == 1 and enemies_to_spawn == wave_size - 1
 	if wave <= 8 and signs_this_wave < 3 and (first_of_run or randf() < 0.3):
