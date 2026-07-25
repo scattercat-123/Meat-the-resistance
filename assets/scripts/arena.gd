@@ -1,6 +1,12 @@
 extends Node2D
 
 const ENEMY_SCENE := preload("res://assets/scenes/enemy.tscn")
+const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_TITLE := preload("res://assets/fonts/Singsong.otf")
+
+const MEAT_RED := Color(0.73, 0.22, 0.18)
+const CREAM := Color(0.91, 0.78, 0.66)
+const PANEL_BG := Color(0.07, 0.07, 0.09, 0.96)
 
 const UPGRADES := [
 	{"name": "Bigger steak", "desc": "+10 damage"},
@@ -20,6 +26,8 @@ var hp_label: Label
 var player: CharacterBody2D
 
 func _ready() -> void:
+	GameManager.enemies_alive = 0
+	GameManager.score = 0
 	player = $Player
 
 	spawn_timer = Timer.new()
@@ -38,13 +46,58 @@ func _build_hud() -> void:
 	hud = CanvasLayer.new()
 	add_child(hud)
 
-	wave_label = Label.new()
-	wave_label.position = Vector2(20, 16)
+	wave_label = _make_label("", FONT_PIXEL, 44, Color.WHITE)
+	wave_label.position = Vector2(32, 24)
 	hud.add_child(wave_label)
 
-	hp_label = Label.new()
-	hp_label.position = Vector2(20, 44)
+	hp_label = _make_label("", FONT_PIXEL, 44, CREAM)
+	hp_label.position = Vector2(32, 78)
 	hud.add_child(hp_label)
+
+func _make_label(txt: String, font: Font, size: int, color: Color) -> Label:
+	var l := Label.new()
+	l.text = txt
+	l.add_theme_font_override("font", font)
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	return l
+
+func _make_panel(size: Vector2) -> Panel:
+	var panel := Panel.new()
+	panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	panel.size = size
+	panel.position = (Vector2(1920, 1080) - size) / 2.0
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = PANEL_BG
+	sb.border_color = MEAT_RED
+	sb.set_border_width_all(6)
+	sb.set_corner_radius_all(16)
+	panel.add_theme_stylebox_override("panel", sb)
+	hud.add_child(panel)
+	return panel
+
+func _make_button(txt: String, size: Vector2) -> Button:
+	var btn := Button.new()
+	btn.text = txt
+	btn.custom_minimum_size = size
+	btn.add_theme_font_override("font", FONT_PIXEL)
+	btn.add_theme_font_size_override("font_size", 40)
+	btn.add_theme_color_override("font_color", Color.WHITE)
+	btn.add_theme_color_override("font_hover_color", CREAM)
+
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.13, 0.13, 0.16)
+	normal.border_color = Color(0.35, 0.35, 0.4)
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(10)
+	btn.add_theme_stylebox_override("normal", normal)
+
+	var hover := normal.duplicate()
+	hover.bg_color = MEAT_RED
+	hover.border_color = CREAM
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", hover)
+	return btn
 
 func _start_wave() -> void:
 	wave += 1
@@ -84,20 +137,22 @@ func _on_player_died() -> void:
 	spawn_timer.stop()
 	get_tree().paused = true
 
-	var panel := Panel.new()
-	panel.process_mode = Node.PROCESS_MODE_ALWAYS
-	panel.position = Vector2(640, 400)
-	panel.custom_minimum_size = Vector2(260, 110)
-	hud.add_child(panel)
+	var panel := _make_panel(Vector2(820, 460))
 
-	var label := Label.new()
-	label.text = "Game over — wave %d" % wave
-	label.position = Vector2(16, 14)
-	panel.add_child(label)
+	var title := _make_label("Game Over", FONT_TITLE, 110, MEAT_RED)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 30
+	panel.add_child(title)
 
-	var restart := Button.new()
-	restart.text = "Restart"
-	restart.position = Vector2(16, 50)
+	var sub := _make_label("You survived %d waves" % (wave - 1), FONT_PIXEL, 42, CREAM)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	sub.offset_top = 200
+	panel.add_child(sub)
+
+	var restart := _make_button("Play again", Vector2(400, 90))
+	restart.position = Vector2((panel.size.x - 400) / 2.0, 310)
 	restart.pressed.connect(func():
 		get_tree().paused = false
 		get_tree().reload_current_scene()
@@ -110,23 +165,18 @@ func _offer_upgrade() -> void:
 	choices.shuffle()
 	choices = choices.slice(0, 3)
 
-	var panel := Panel.new()
-	panel.process_mode = Node.PROCESS_MODE_ALWAYS
-	panel.position = Vector2(560, 300)
-	panel.custom_minimum_size = Vector2(360, 170)
-	hud.add_child(panel)
+	var panel := _make_panel(Vector2(1000, 620))
 
-	var title := Label.new()
-	title.text = "Choose an upgrade"
-	title.position = Vector2(16, 12)
+	var title := _make_label("Choose an upgrade", FONT_TITLE, 80, Color.WHITE)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 35
 	panel.add_child(title)
 
 	for i in choices.size():
 		var choice = choices[i]
-		var btn := Button.new()
-		btn.text = "%s — %s" % [choice.name, choice.desc]
-		btn.position = Vector2(16, 44 + i * 36)
-		btn.custom_minimum_size = Vector2(320, 30)
+		var btn := _make_button("%s\n%s" % [choice.name, choice.desc], Vector2(840, 110))
+		btn.position = Vector2((panel.size.x - 840) / 2.0, 185 + i * 135)
 		btn.pressed.connect(_pick_upgrade.bind(choice.name, panel))
 		panel.add_child(btn)
 
