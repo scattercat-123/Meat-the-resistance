@@ -25,11 +25,11 @@ func _splat(victim: Node2D) -> void:
 	p.lifetime = 0.4
 	p.explosiveness = 1.0
 	p.spread = 180.0
-	p.initial_velocity_min = 90.0
-	p.initial_velocity_max = 240.0
+	p.initial_velocity_min = 110.0
+	p.initial_velocity_max = 280.0
 	p.gravity = Vector2(0, 800)
-	p.scale_amount_min = 3.0
-	p.scale_amount_max = 6.0
+	p.scale_amount_min = 4.0
+	p.scale_amount_max = 8.0
 	p.color = Color(0.85, 0.15, 0.1)
 	p.position = global_position
 	p.z_index = 40

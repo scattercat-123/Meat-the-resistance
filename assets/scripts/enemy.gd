@@ -125,23 +125,23 @@ func _throw_eggplant() -> void:
 	mark.position = land
 	mark.rotation = PI / 4.0
 	var mr := ColorRect.new()
-	mr.size = Vector2(34, 34)
-	mr.position = Vector2(-17, -17)
+	mr.size = Vector2(72, 72)
+	mr.position = Vector2(-36, -36)
 	mr.color = Color(0.9, 0.15, 0.15, 0.28)
 	mark.add_child(mr)
 	get_parent().add_child(mark)
 
 	var egg := Sprite2D.new()
 	egg.texture = EGGPLANT_TEX
-	egg.scale = Vector2(3, 3)
+	egg.scale = Vector2(4, 4)
 	egg.global_position = global_position
 	egg.z_index = 30
 	get_parent().add_child(egg)
 
 	var flight := global_position.distance_to(land) / 420.0
 	var tws := egg.create_tween()
-	tws.tween_property(egg, "scale", Vector2(4.6, 4.6), flight * 0.5)
-	tws.tween_property(egg, "scale", Vector2(3, 3), flight * 0.5)
+	tws.tween_property(egg, "scale", Vector2(6, 6), flight * 0.5)
+	tws.tween_property(egg, "scale", Vector2(4, 4), flight * 0.5)
 	var tw := egg.create_tween()
 	tw.set_parallel(true)
 	tw.tween_property(egg, "global_position", land, flight)
@@ -157,11 +157,11 @@ func _throw_eggplant() -> void:
 		p.lifetime = 0.4
 		p.explosiveness = 1.0
 		p.spread = 180.0
-		p.initial_velocity_min = 80.0
-		p.initial_velocity_max = 220.0
+		p.initial_velocity_min = 100.0
+		p.initial_velocity_max = 260.0
 		p.gravity = Vector2(0, 800)
-		p.scale_amount_min = 3.0
-		p.scale_amount_max = 5.0
+		p.scale_amount_min = 4.0
+		p.scale_amount_max = 7.0
 		p.color = Color(0.55, 0.25, 0.75)
 		p.position = land
 		p.z_index = 40
@@ -276,16 +276,16 @@ func _spawn_damage_number(amount: float) -> void:
 	var l := Label.new()
 	l.text = str(int(amount))
 	l.add_theme_font_override("font", FONT_PIXEL)
-	l.add_theme_font_size_override("font_size", 34)
+	l.add_theme_font_size_override("font_size", 44)
 	l.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
 	l.add_theme_color_override("font_outline_color", Color(0.2, 0.08, 0.04))
-	l.add_theme_constant_override("outline_size", 8)
+	l.add_theme_constant_override("outline_size", 10)
 	l.z_index = 50
-	l.position = global_position + Vector2(randf_range(-18, 18), -40)
+	l.position = global_position + Vector2(randf_range(-22, 22), -55)
 	get_parent().add_child(l)
 	var tw := l.create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(l, "position:y", l.position.y - 55.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(l, "position:y", l.position.y - 70.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(l, "modulate:a", 0.0, 0.55).set_delay(0.15)
 	tw.chain().tween_callback(l.queue_free)
 	
@@ -298,11 +298,11 @@ func _spawn_splatter() -> void:
 	p.explosiveness = 1.0
 	p.direction = Vector2.UP
 	p.spread = 70.0
-	p.initial_velocity_min = 120.0
-	p.initial_velocity_max = 260.0
+	p.initial_velocity_min = 150.0
+	p.initial_velocity_max = 320.0
 	p.gravity = Vector2(0, 900)
-	p.scale_amount_min = 3.0
-	p.scale_amount_max = 6.0
+	p.scale_amount_min = 4.0
+	p.scale_amount_max = 8.0
 	p.color = Color(0.35, 0.8, 0.35)
 	p.position = global_position
 	p.z_index = 40
@@ -434,8 +434,8 @@ func _show_telegraph() -> void:
 	telegraph.z_index = 5
 	var r := ColorRect.new()
 	var reach := DASH_SPEED * DASH_TIME + 60.0
-	r.size = Vector2(reach, 54)
-	r.position = Vector2(0, -27)
+	r.size = Vector2(reach, 64)
+	r.position = Vector2(0, -32)
 	r.color = Color(0.9, 0.15, 0.15, 0.3)
 	telegraph.add_child(r)
 	get_parent().add_child(telegraph)

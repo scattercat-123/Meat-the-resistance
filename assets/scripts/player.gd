@@ -165,7 +165,7 @@ func _stop_breathing() -> void:
 
 func _spawn_dust() -> void:
 	var d := ColorRect.new()
-	d.size = Vector2(9, 5)
+	d.size = Vector2(12, 7)
 	d.position = global_position + Vector2(randf_range(-14, 6), 62)
 	d.color = Color(0.55, 0.5, 0.42, 0.45)
 	get_parent().add_child(d)
