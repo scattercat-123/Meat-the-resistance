@@ -164,7 +164,14 @@ func attack() -> void:
 
 func _on_hitbox_body_entered(body: Node) -> void:
 	if body.has_method("take_damage"):
-		body.take_damage(attack_damage)
+		body.take_damage(attack_damage, global_position)
+		GameManager.hit_landed.emit()
+		_hit_stop()
+
+func _hit_stop() -> void:
+	Engine.time_scale = 0.05
+	await get_tree().create_timer(0.045, true, false, true).timeout
+	Engine.time_scale = 1.0
 
 func _on_hurtbox_body_entered(body: Node) -> void:
 	if not damage_cooldown.is_stopped():

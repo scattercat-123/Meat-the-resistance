@@ -39,8 +39,17 @@ func _ready() -> void:
 	player.health_changed.connect(_on_health_changed)
 	player.died.connect(_on_player_died)
 	GameManager.enemy_died.connect(_check_wave_clear)
+	GameManager.hit_landed.connect(_shake_camera)
 
 	_start_wave()
+
+func _shake_camera() -> void:
+	var cam := $Camera2D
+	var tw := create_tween()
+	for i in 4:
+		var strength := 14.0 * (1.0 - i / 4.0)
+		tw.tween_property(cam, "offset", Vector2(randf_range(-strength, strength), randf_range(-strength, strength)), 0.03)
+	tw.tween_property(cam, "offset", Vector2.ZERO, 0.04)
 
 func _build_hud() -> void:
 	hud = CanvasLayer.new()

@@ -1,6 +1,7 @@
 extends Node
 
 signal enemy_died
+signal hit_landed
 
 var score := 0
 var enemies_alive := 0
