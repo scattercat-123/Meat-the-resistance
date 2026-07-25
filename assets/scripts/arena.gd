@@ -15,6 +15,8 @@ const UPGRADES := [
 	{"name": "Fast legs", "desc": "+40 speed"},
 	{"name": "Flaming steak", "desc": "+15 damage, longer swing"},
 	{"name": "Long reach", "desc": "bigger hitbox, faster swing"},
+	{"name": "Frozen steak", "desc": "freezing cuts slow vegans down"},
+	{"name": "Bone-in steak", "desc": "+50% damage, more reach, slower"},
 ]
 
 var wave := 0

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ingjyfwfde6x"
-path="res://.godot/imported/HumanSteak_Raw.png-ef107876d63d4cc9f9cda5055c52e568.ctex"
+path="res://.godot/imported/HumanSteak_Raw.png-038018963aaed8217e92a4f297031348.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/HumanSteak_Raw.png"
-dest_files=["res://.godot/imported/HumanSteak_Raw.png-ef107876d63d4cc9f9cda5055c52e568.ctex"]
+source_file="res://assets/images/HumanSteak_Raw.png"
+dest_files=["res://.godot/imported/HumanSteak_Raw.png-038018963aaed8217e92a4f297031348.ctex"]
 
 [params]
 
