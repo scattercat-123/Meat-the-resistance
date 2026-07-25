@@ -11,19 +11,21 @@ config_version=5
 [application]
 
 config/name="Meat the resistance"
-run/main_scene="res://Assets/scenes/arena.tscn"
+run/main_scene="res://assets/scenes/arena.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*res://Assets/scripts/game_manager.gd"
+GameManager="*res://assets/scripts/game_manager.gd"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=3
+window/size/mode=2
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 mouse_cursor/custom_image="uid://b8ieqvj57tlsm"
 
 [editor_plugins]

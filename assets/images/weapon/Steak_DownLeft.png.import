@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ingjyfwfde6x"
-path="res://.godot/imported/HumanSteak_Raw.png-038018963aaed8217e92a4f297031348.ctex"
+uid="uid://dwraleuy1wosw"
+path="res://.godot/imported/Steak_DownLeft.png-0afae15c5907a54d38b8164ccd2de3b6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/HumanSteak_Raw.png"
-dest_files=["res://.godot/imported/HumanSteak_Raw.png-038018963aaed8217e92a4f297031348.ctex"]
+source_file="res://assets/images/weapon/Steak_DownLeft.png"
+dest_files=["res://.godot/imported/Steak_DownLeft.png-0afae15c5907a54d38b8164ccd2de3b6.ctex"]
 
 [params]
 
