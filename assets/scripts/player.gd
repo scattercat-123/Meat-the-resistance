@@ -16,6 +16,7 @@ const SLASH_FPS := 14.0
 
 @onready var anim: AnimatedSprite2D = $Anim
 @onready var weapon_anim: AnimatedSprite2D = $WeaponAnim
+@onready var steak: Sprite2D = $Steak
 @onready var aim: Node2D = $Aim
 @onready var hitbox: Area2D = $Aim/WeaponHitbox
 @onready var hurtbox: Area2D = $Hurtbox
@@ -81,6 +82,11 @@ func _physics_process(_delta: float) -> void:
 	if dir != Vector2.ZERO:
 		facing = dir.normalized()
 		aim.rotation = facing.angle()
+		if facing.x != 0.0:
+			var s := 1.0 if facing.x > 0.0 else -1.0
+			steak.flip_h = s < 0.0
+			steak.position.x = 34.0 * s
+			steak.rotation = 0.3 * s
 
 	if not attacking:
 		if dir != Vector2.ZERO:
@@ -113,6 +119,7 @@ func attack() -> void:
 	attacking = true
 	var d := _slash_dir()
 	anim.play("Slash" + d)
+	steak.visible = false
 	weapon_anim.visible = true
 	weapon_anim.play(d)
 
@@ -122,6 +129,7 @@ func attack() -> void:
 	await get_tree().create_timer(2.0 / SLASH_FPS).timeout
 	attacking = false
 	weapon_anim.visible = false
+	steak.visible = true
 	await get_tree().create_timer(attack_cooldown).timeout
 	can_attack = true
 
