@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://v0f5k71vray0"
-path="res://.godot/imported/cibercafe_enigma_front_06_asepritefile-spritesheet.png-64f5cdcc3d61a4f2d29e598b163f8a6b.ctex"
+path="res://.godot/imported/cibercafe_enigma_front_06_asepritefile-spritesheet.png-2f2b3ac06fe625f6006db2110eeaee64.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png"
-dest_files=["res://.godot/imported/cibercafe_enigma_front_06_asepritefile-spritesheet.png-64f5cdcc3d61a4f2d29e598b163f8a6b.ctex"]
+source_file="res://Assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png"
+dest_files=["res://.godot/imported/cibercafe_enigma_front_06_asepritefile-spritesheet.png-2f2b3ac06fe625f6006db2110eeaee64.ctex"]
 
 [params]
 
