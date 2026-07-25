@@ -39,3 +39,9 @@ func on_enemy_died() -> void:
 	score += 1
 	enemies_alive -= 1
 	enemy_died.emit()
+
+func on_hit_landed() -> void:
+	hit_landed.emit()
+
+func on_player_hurt() -> void:
+	player_hurt.emit()

@@ -167,7 +167,7 @@ func attack() -> void:
 func _on_hitbox_body_entered(body: Node) -> void:
 	if body.has_method("take_damage"):
 		body.take_damage(attack_damage, global_position)
-		GameManager.hit_landed.emit()
+		GameManager.on_hit_landed()
 		_hit_stop()
 
 func _hit_stop() -> void:
@@ -192,7 +192,7 @@ func take_damage(amount: float) -> void:
 		died.emit()
 		return
 	GameManager.play("hurt")
-	GameManager.player_hurt.emit()
+	GameManager.on_player_hurt()
 	_damage_flash()
 
 func _damage_flash() -> void:
