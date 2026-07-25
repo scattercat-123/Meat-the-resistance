@@ -9,6 +9,21 @@ const DIRECTIONS := ["Down", "Up", "Left", "Right", "DownLeft", "DownRight", "Up
 const SLASH_DIRS := ["DownRight", "DownLeft", "UpRight", "UpLeft"]
 const SLASH_FPS := 14.0
 
+const WEAPONS := {
+	"raw": {
+		"hand": preload("res://assets/images/weapon/steak_small.png"),
+		"sheet": "Steak_", "dmg": 1.0, "cd": 1.0, "reach": 1.0, "slow": 0.0,
+	},
+	"frozen": {
+		"hand": preload("res://assets/images/weapon/steak_frozen_small.png"),
+		"sheet": "Steak_Frozen_", "dmg": 0.8, "cd": 1.15, "reach": 1.0, "slow": 2.0,
+	},
+	"bone": {
+		"hand": preload("res://assets/images/weapon/steak_bone_small.png"),
+		"sheet": "Steak_Bone_", "dmg": 1.5, "cd": 1.35, "reach": 1.3, "slow": 0.0,
+	},
+}
+
 @export var speed := 220.0
 @export var attack_damage := 15.0
 @export var attack_cooldown := 0.25
@@ -27,6 +42,8 @@ const SLASH_FPS := 14.0
 var health := 0.0
 var can_attack := true
 var attacking := false
+var weapon := "raw"
+var reach_bonus := 1.0
 var dashing := false
 var can_dash := true
 var dash_dir := Vector2.DOWN
@@ -61,9 +78,15 @@ func _build_char_frames() -> SpriteFrames:
 
 func _build_weapon_frames() -> SpriteFrames:
 	var sf := SpriteFrames.new()
-	for dir_name in SLASH_DIRS:
-		_add_sheet(sf, dir_name, WEAPON_DIR + "Steak_" + dir_name + ".png", 5, 64, SLASH_FPS)
+	for w in WEAPONS:
+		for dir_name in SLASH_DIRS:
+			_add_sheet(sf, WEAPONS[w].sheet + dir_name, WEAPON_DIR + WEAPONS[w].sheet + dir_name + ".png", 5, 64, SLASH_FPS)
 	return sf
+
+func set_weapon(name_key: String) -> void:
+	weapon = name_key
+	steak.texture = WEAPONS[name_key].hand
+	hitbox.get_node("WeaponShape").scale = Vector2.ONE * WEAPONS[name_key].reach * reach_bonus
 
 func _add_sheet(sf: SpriteFrames, anim_name: String, path: String, count: int, size: int, fps: float) -> void:
 	var tex: Texture2D = load(path)
@@ -160,7 +183,7 @@ func attack() -> void:
 	anim.play("Slash" + d)
 	steak.visible = false
 	weapon_anim.visible = true
-	weapon_anim.play(d)
+	weapon_anim.play(WEAPONS[weapon].sheet + d)
 
 	hitbox.monitoring = true
 	await get_tree().create_timer(3.0 / SLASH_FPS).timeout
@@ -169,12 +192,14 @@ func attack() -> void:
 	attacking = false
 	weapon_anim.visible = false
 	steak.visible = true
-	await get_tree().create_timer(attack_cooldown).timeout
+	await get_tree().create_timer(attack_cooldown * WEAPONS[weapon].cd).timeout
 	can_attack = true
 
 func _on_hitbox_body_entered(body: Node) -> void:
 	if body.has_method("take_damage"):
-		body.take_damage(attack_damage, global_position)
+		body.take_damage(attack_damage * WEAPONS[weapon].dmg, global_position)
+		if WEAPONS[weapon].slow > 0.0 and body.has_method("apply_slow"):
+			body.apply_slow(0.5, WEAPONS[weapon].slow)
 		GameManager.on_hit_landed()
 		_hit_stop()
 
@@ -226,5 +251,10 @@ func apply_upgrade(upgrade_name: String) -> void:
 		"Flaming steak":
 			attack_damage += 15
 		"Long reach":
-			hitbox.get_node("WeaponShape").scale *= 1.2
+			reach_bonus *= 1.2
+			set_weapon(weapon)
 			attack_cooldown *= 0.85
+		"Frozen steak":
+			set_weapon("frozen")
+		"Bone-in steak":
+			set_weapon("bone")
