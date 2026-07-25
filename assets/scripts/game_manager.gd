@@ -17,6 +17,16 @@ const SFX := {
 var score := 0
 var enemies_alive := 0
 var arena_bound := Vector2(960, 540)
+var dash_slots := 2
+
+func request_dash_slot() -> bool:
+	if dash_slots > 0:
+		dash_slots -= 1
+		return true
+	return false
+
+func release_dash_slot() -> void:
+	dash_slots = min(dash_slots + 1, 2)
 
 var _voices: Array[AudioStreamPlayer] = []
 

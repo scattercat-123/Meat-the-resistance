@@ -33,6 +33,7 @@ var player: CharacterBody2D
 func _ready() -> void:
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
+	GameManager.dash_slots = 2
 	player = $Player
 
 	spawn_timer = Timer.new()
