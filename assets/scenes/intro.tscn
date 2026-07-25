@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://v0f5k71vray0" path="res://assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png" id="3_rckak"]
 [ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://assets/fonts/pixelart.ttf" id="4_ts36g"]
 [ext_resource type="Script" uid="uid://cief84a7ysoyp" path="res://assets/scripts/menu.gd" id="4_w8vp1"]
-[ext_resource type="PackedScene" uid="uid://bx8t58svlciqx" path="res://assets/scenes/music.tscn" id="7_ts36g"]
 
 [sub_resource type="Animation" id="Animation_58f7j"]
 length = 0.001
@@ -400,8 +399,6 @@ offset_right = 1920.0
 offset_bottom = 1080.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0)
-
-[node name="Music" parent="." unique_id=429765256 instance=ExtResource("7_ts36g")]
 
 [connection signal="mouse_entered" from="Menu/Play/play area" to="Menu" method="_on_play_area_mouse_entered"]
 [connection signal="mouse_exited" from="Menu/Play/play area" to="Menu" method="_on_play_area_mouse_exited"]

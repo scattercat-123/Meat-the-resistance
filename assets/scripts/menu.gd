@@ -13,7 +13,7 @@ var skippable = false
 func _ready() -> void:
 	Input.warp_mouse(mouse_pos.position)
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if skippable == true and Input.is_action_just_pressed("attack"):
 		animation_player.play("out")
 		await animation_player.animation_finished
