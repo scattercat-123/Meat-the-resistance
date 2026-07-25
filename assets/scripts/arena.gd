@@ -28,6 +28,7 @@ var enemies_to_spawn := 0
 var wave_size := 0
 var wave_kills := 0
 var tomatoes_dropped := 0
+var signs_this_wave := 0
 var spawn_timer: Timer
 var hud: CanvasLayer
 var wave_label: Label
@@ -202,12 +203,13 @@ func _start_wave() -> void:
 	wave_label.text = "Wave %d" % wave
 	if wave > 1:
 		player.heal(10.0)
-	enemies_to_spawn = 3 + wave * 2
+	enemies_to_spawn = 3 + int(wave * 1.3)
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
 	wave_size = enemies_to_spawn
 	wave_kills = 0
 	tomatoes_dropped = 0
+	signs_this_wave = 0
 	spawn_timer.start()
 
 func _spawn_one() -> void:
@@ -221,10 +223,17 @@ func _spawn_one() -> void:
 	enemy.max_health += wave * 7.0 + wave * wave
 	enemy.damage_bonus = wave
 	var roll := randf()
-	if wave >= 7 and roll < 0.18:
+	if wave >= 7 and roll < 0.15:
 		enemy.make_variant("tank")
-	elif wave >= 4 and roll < 0.45:
+	elif wave >= 5 and roll < 0.27:
+		enemy.make_variant("healer")
+	elif wave >= 3 and roll < 0.47:
+		enemy.make_variant("lobber")
+	elif wave >= 4 and roll < 0.72:
 		enemy.make_variant("runner")
+	if wave >= 4 and wave <= 8 and signs_this_wave < 3 and randf() < 0.3:
+		enemy.carry_sign()
+		signs_this_wave += 1
 	enemy.global_position = _edge_spawn_point()
 	add_child(enemy)
 	GameManager.enemies_alive += 1

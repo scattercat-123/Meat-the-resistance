@@ -14,6 +14,7 @@ const DASH_TIME := 0.3
 const TELEGRAPH_TIME := 0.65
 
 const SIGN_TEXTS := ["GO VEGAN", "MEAT IS MURDER", "EAT KALE", "TOFU 4EVER", "SAVE THE COWS", "PLANT POWER"]
+const EGGPLANT_TEX := preload("res://assets/images/weapon/eggplant.png")
 
 var last_animation_state = ""
 var health := 0.0
@@ -27,6 +28,7 @@ var base_color: Color
 var base_speed := 0.0
 var damage_bonus := 0.0
 var variant := "basic"
+var casting := false
 var dash_state := "none"
 var dash_dir := Vector2.ZERO
 var telegraph: Node2D
@@ -48,8 +50,20 @@ func _ready() -> void:
 	add_child(dash_timer)
 	dash_timer.start()
 
-	if randf() < 0.4:
-		_make_sign()
+	match variant:
+		"lobber":
+			_setup_ability(randf_range(2.0, 4.5), _try_lob)
+		"healer":
+			_setup_ability(2.2, _heal_pulse, false)
+
+func _setup_ability(wait: float, callback: Callable, one_shot := true) -> void:
+	var t := Timer.new()
+	t.one_shot = one_shot
+	t.wait_time = wait
+	t.timeout.connect(callback)
+	t.name = "ability_timer"
+	add_child(t)
+	t.start()
 
 func make_variant(kind: String) -> void:
 	variant = kind
@@ -64,8 +78,104 @@ func make_variant(kind: String) -> void:
 		damage_bonus += 5.0
 		scale *= 1.35
 		modulate = Color(0.45, 0.75, 0.5)
+	elif kind == "lobber":
+		speed *= 0.85
+		modulate = Color(0.85, 0.62, 1.0)
+	elif kind == "healer":
+		speed *= 0.9
+		max_health *= 0.8
+		modulate = Color(1.0, 0.72, 0.85)
 
-func _make_sign() -> void:
+func _try_lob() -> void:
+	var t: Timer = get_node("ability_timer")
+	t.wait_time = randf_range(3.0, 6.0)
+	t.start()
+	if dying or target == null or dash_state != "none" or casting:
+		return
+	if global_position.distance_to(target.global_position) > 850.0:
+		return
+	casting = true
+	var tw := create_tween()
+	for i in 2:
+		tw.tween_property(sprite, "modulate", Color(0.6, 0.3, 1.0), 0.12)
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.12)
+	await get_tree().create_timer(0.5).timeout
+	casting = false
+	if dying or target == null:
+		return
+	_throw_eggplant()
+
+func _throw_eggplant() -> void:
+	var land: Vector2 = target.global_position
+	GameManager.play("swing", -14.0)
+
+	var mark := Node2D.new()
+	mark.position = land
+	mark.rotation = PI / 4.0
+	var mr := ColorRect.new()
+	mr.size = Vector2(34, 34)
+	mr.position = Vector2(-17, -17)
+	mr.color = Color(0.9, 0.15, 0.15, 0.28)
+	mark.add_child(mr)
+	get_parent().add_child(mark)
+
+	var egg := Sprite2D.new()
+	egg.texture = EGGPLANT_TEX
+	egg.scale = Vector2(3, 3)
+	egg.global_position = global_position
+	egg.z_index = 30
+	get_parent().add_child(egg)
+
+	var flight := global_position.distance_to(land) / 500.0
+	var tws := egg.create_tween()
+	tws.tween_property(egg, "scale", Vector2(4.6, 4.6), flight * 0.5)
+	tws.tween_property(egg, "scale", Vector2(3, 3), flight * 0.5)
+	var tw := egg.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(egg, "global_position", land, flight)
+	tw.tween_property(egg, "rotation", TAU * 2.0, flight)
+	tw.chain().tween_callback(func():
+		mark.queue_free()
+		GameManager.play("splat", -4.0)
+		var p := CPUParticles2D.new()
+		p.one_shot = true
+		p.emitting = true
+		p.amount = 12
+		p.lifetime = 0.4
+		p.explosiveness = 1.0
+		p.spread = 180.0
+		p.initial_velocity_min = 80.0
+		p.initial_velocity_max = 220.0
+		p.gravity = Vector2(0, 800)
+		p.scale_amount_min = 3.0
+		p.scale_amount_max = 5.0
+		p.color = Color(0.55, 0.25, 0.75)
+		p.position = land
+		p.z_index = 40
+		egg.get_parent().add_child(p)
+		get_tree().create_timer(0.5).timeout.connect(p.queue_free)
+		if is_instance_valid(target) and target.global_position.distance_to(land) < 70.0:
+			target.take_damage(10.0 + damage_bonus)
+		egg.queue_free()
+	)
+
+func _heal_pulse() -> void:
+	if dying:
+		return
+	var healed := false
+	for n in get_parent().get_children():
+		if n != self and n.has_method("apply_knockback") and not n.dying and n.health < n.max_health and global_position.distance_to(n.global_position) < 260.0:
+			n.health = minf(n.health + 12.0 + damage_bonus, n.max_health)
+			n.sprite.modulate = Color(0.5, 1.0, 0.5)
+			var twn := n.create_tween()
+			twn.tween_property(n.sprite, "modulate", Color.WHITE, 0.3)
+			healed = true
+	if healed:
+		var tw := create_tween()
+		tw.tween_property(sprite, "scale", Vector2(1.25, 1.25), 0.12)
+		tw.tween_property(sprite, "scale", Vector2.ONE, 0.15)
+
+func carry_sign() -> void:
 	var holder := Node2D.new()
 	holder.z_index = 6
 	var stick := ColorRect.new()
@@ -108,6 +218,8 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 	elif dash_state == "dashing":
 		velocity = dash_dir * DASH_SPEED
+	elif casting:
+		velocity = Vector2.ZERO
 	elif target and follow:
 		velocity = (target.global_position - global_position).normalized() * speed
 		movement()
