@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5q3548ty2hc2"
-path="res://.godot/imported/Steak_UpLeft.png-04d6333b352d86723f944898dd88a5d5.ctex"
+uid="uid://75x3522wnq1k"
+path="res://.godot/imported/tomato.png-3dfb532782186b02d7449ff693180cc9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/weapon/Steak_UpLeft.png"
-dest_files=["res://.godot/imported/Steak_UpLeft.png-04d6333b352d86723f944898dd88a5d5.ctex"]
+source_file="res://assets/images/weapon/tomato.png"
+dest_files=["res://.godot/imported/tomato.png-3dfb532782186b02d7449ff693180cc9.ctex"]
 
 [params]
 

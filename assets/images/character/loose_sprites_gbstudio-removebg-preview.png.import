@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2wp2tgtvcyjc"
-path="res://.godot/imported/loose_sprites_gbstudio-removebg-preview.png-74403c856787da6fba552ade11fc975c.ctex"
+path="res://.godot/imported/loose_sprites_gbstudio-removebg-preview.png-26bfcc68db312532aea978cce4ab185f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/character/loose_sprites_gbstudio-removebg-preview.png"
-dest_files=["res://.godot/imported/loose_sprites_gbstudio-removebg-preview.png-74403c856787da6fba552ade11fc975c.ctex"]
+source_file="res://assets/images/character/loose_sprites_gbstudio-removebg-preview.png"
+dest_files=["res://.godot/imported/loose_sprites_gbstudio-removebg-preview.png-26bfcc68db312532aea978cce4ab185f.ctex"]
 
 [params]
 

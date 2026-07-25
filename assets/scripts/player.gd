@@ -39,7 +39,10 @@ const WEAPONS := {
 @onready var hitbox: Area2D = $Aim/WeaponHitbox
 @onready var hurtbox: Area2D = $Hurtbox
 
+const TOMATO_SCENE := preload("res://assets/scenes/tomato.tscn")
+
 var health := 0.0
+var tomatoes := 0
 var can_attack := true
 var attacking := false
 var weapon := "raw"
@@ -139,6 +142,9 @@ func _physics_process(_delta: float) -> void:
 	if can_attack and not dashing and Input.is_action_just_pressed("attack"):
 		attack()
 
+	if tomatoes > 0 and not dashing and Input.is_action_just_pressed("throw"):
+		throw_tomato()
+
 func dash(dir: Vector2) -> void:
 	can_dash = false
 	dashing = true
@@ -223,6 +229,18 @@ func _handle_contacts() -> void:
 				dir = Vector2.RIGHT.rotated(randf() * TAU)
 			body.apply_knockback(dir, 650.0)
 
+func throw_tomato() -> void:
+	tomatoes -= 1
+	var t := TOMATO_SCENE.instantiate()
+	t.global_position = global_position
+	t.dir = (get_global_mouse_position() - global_position).normalized()
+	get_parent().add_child(t)
+	GameManager.play("swing", -12.0)
+
+func heal(amount: float) -> void:
+	health = minf(health + amount, max_health)
+	health_changed.emit(health, max_health)
+
 func take_damage(amount: float) -> void:
 	health = max(health - amount, 0.0)
 	health_changed.emit(health, max_health)
@@ -244,22 +262,25 @@ func _damage_flash() -> void:
 func apply_upgrade(upgrade_name: String) -> void:
 	match upgrade_name:
 		"Bigger steak":
-			attack_damage += 10
+			attack_damage *= 1.25
 		"Double swing":
-			attack_cooldown *= 0.6
+			attack_cooldown = maxf(attack_cooldown * 0.7, 0.08)
 		"Thick hide":
-			max_health += 20
+			max_health += 25
 			health = max_health
 			health_changed.emit(health, max_health)
 		"Fast legs":
 			speed += 40
 		"Flaming steak":
-			attack_damage += 15
+			attack_damage *= 1.35
 		"Long reach":
 			reach_bonus *= 1.2
 			set_weapon(weapon)
-			attack_cooldown *= 0.85
+			attack_cooldown = maxf(attack_cooldown * 0.85, 0.08)
 		"Frozen steak":
 			set_weapon("frozen")
 		"Bone-in steak":
 			set_weapon("bone")
+		"Protein shake":
+			attack_damage *= 1.15
+			speed += 35

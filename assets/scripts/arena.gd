@@ -9,25 +9,34 @@ const CREAM := Color(0.91, 0.78, 0.66)
 const PANEL_BG := Color(0.07, 0.07, 0.09, 0.96)
 
 const UPGRADES := [
-	{"name": "Bigger steak", "desc": "+10 damage"},
+	{"name": "Bigger steak", "desc": "+25% damage"},
 	{"name": "Double swing", "desc": "-30% attack cooldown"},
-	{"name": "Thick hide", "desc": "+20 max health, full heal"},
+	{"name": "Thick hide", "desc": "+25 max health, full heal"},
 	{"name": "Fast legs", "desc": "+40 speed"},
-	{"name": "Flaming steak", "desc": "+15 damage, longer swing"},
+	{"name": "Flaming steak", "desc": "+35% damage, well done"},
 	{"name": "Long reach", "desc": "bigger hitbox, faster swing"},
 	{"name": "Frozen steak", "desc": "freezing cuts slow vegans down"},
 	{"name": "Bone-in steak", "desc": "+50% damage, more reach, slower"},
+	{"name": "Protein shake", "desc": "+15% damage, +35 speed"},
 ]
+
+const TOMATO_PICKUP_SCENE := preload("res://assets/scenes/tomato_pickup.tscn")
+const TOMATO_WAVE := 6
 
 var wave := 0
 var enemies_to_spawn := 0
+var wave_size := 0
+var wave_kills := 0
+var tomatoes_dropped := 0
 var spawn_timer: Timer
 var hud: CanvasLayer
 var wave_label: Label
+var score_label: Label
 var hp_label: Label
 var hp_fill: ColorRect
 var dash_fill: ColorRect
 var dash_was_ready := true
+var tomato_label: Label
 var player: CharacterBody2D
 
 func _ready() -> void:
@@ -78,6 +87,10 @@ func _build_hud() -> void:
 	wave_label.position = Vector2(32, 24)
 	hud.add_child(wave_label)
 
+	score_label = _make_label("Grilled: 0", FONT_PIXEL, 44, CREAM)
+	score_label.position = Vector2(1520, 24)
+	hud.add_child(score_label)
+
 	var hp_title := _make_label("HP", FONT_PIXEL, 28, Color(0.65, 0.65, 0.7))
 	hp_title.position = Vector2(32, 86)
 	hud.add_child(hp_title)
@@ -93,6 +106,16 @@ func _build_hud() -> void:
 	hud.add_child(dash_label)
 
 	dash_fill = _make_bar(Vector2(130, 142), Vector2(200, 22))
+
+	var tomato_icon := Sprite2D.new()
+	tomato_icon.texture = preload("res://assets/images/weapon/tomato.png")
+	tomato_icon.scale = Vector2(3, 3)
+	tomato_icon.position = Vector2(52, 210)
+	hud.add_child(tomato_icon)
+
+	tomato_label = _make_label("x0", FONT_PIXEL, 30, CREAM)
+	tomato_label.position = Vector2(84, 194)
+	hud.add_child(tomato_label)
 
 func _make_bar(pos: Vector2, size: Vector2) -> ColorRect:
 	var bg := Panel.new()
@@ -117,6 +140,7 @@ func _make_bar(pos: Vector2, size: Vector2) -> ColorRect:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(player):
 		return
+	tomato_label.text = "x%d" % player.tomatoes
 	var p: float = player.dash_progress()
 	dash_fill.size.x = (dash_fill.get_parent().size.x - 6.0) * p
 	var dash_ready := p >= 1.0
@@ -175,9 +199,14 @@ func _make_button(txt: String, size: Vector2) -> Button:
 func _start_wave() -> void:
 	wave += 1
 	wave_label.text = "Wave %d" % wave
+	if wave > 1:
+		player.heal(10.0)
 	enemies_to_spawn = 3 + wave * 2
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
+	wave_size = enemies_to_spawn
+	wave_kills = 0
+	tomatoes_dropped = 0
 	spawn_timer.start()
 
 func _spawn_one() -> void:
@@ -187,8 +216,9 @@ func _spawn_one() -> void:
 	enemies_to_spawn -= 1
 
 	var enemy := ENEMY_SCENE.instantiate()
-	enemy.speed += wave * 5.0
-	enemy.max_health += wave * 5.0
+	enemy.speed += minf(wave * 4.0, 100.0)
+	enemy.max_health += wave * 7.0 + wave * wave
+	enemy.damage_bonus = wave
 	enemy.global_position = _edge_spawn_point()
 	add_child(enemy)
 	GameManager.enemies_alive += 1
@@ -202,8 +232,20 @@ func _edge_spawn_point() -> Vector2:
 		_: return Vector2(b.x, randf_range(-b.y, b.y))
 
 func _check_wave_clear() -> void:
+	score_label.text = "Grilled: %d" % GameManager.score
+	wave_kills += 1
+	if wave >= TOMATO_WAVE:
+		while tomatoes_dropped < 3 and wave_kills >= ceili(wave_size * 0.3 * (tomatoes_dropped + 1)):
+			_drop_tomato()
 	if GameManager.enemies_alive <= 0 and enemies_to_spawn <= 0:
 		_offer_upgrade()
+
+func _drop_tomato() -> void:
+	tomatoes_dropped += 1
+	var pickup := TOMATO_PICKUP_SCENE.instantiate()
+	var b := GameManager.arena_bound - Vector2(140, 140)
+	pickup.position = Vector2(randf_range(-b.x, b.x), randf_range(-b.y, b.y))
+	add_child(pickup)
 
 func _on_health_changed(hp: float, max_hp: float) -> void:
 	hp_label.text = "%d/%d" % [int(hp), int(max_hp)]
@@ -246,9 +288,12 @@ func _on_player_died() -> void:
 	panel.add_child(restart)
 
 func _offer_upgrade() -> void:
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(1.5).timeout
 	get_tree().paused = true
-	var choices := UPGRADES.duplicate()
+	var choices := UPGRADES.filter(func(u): return not (
+		(u.name == "Frozen steak" and player.weapon == "frozen")
+		or (u.name == "Bone-in steak" and player.weapon == "bone")
+	))
 	choices.shuffle()
 	choices = choices.slice(0, 3)
 
