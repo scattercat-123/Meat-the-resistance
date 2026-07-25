@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bsoui7r5rijrd"
-path="res://.godot/imported/Steak_Frozen_DownRight.png-53a72fb94aca780f6a570bdff4658103.ctex"
+path="res://.godot/imported/Steak_Frozen_DownRight.png-bdee43ccb252b095a3327514bb3cf237.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/weapon/Steak_Frozen_DownRight.png"
-dest_files=["res://.godot/imported/Steak_Frozen_DownRight.png-53a72fb94aca780f6a570bdff4658103.ctex"]
+source_file="res://assets/images/weapon/Steak_Frozen_DownRight.png"
+dest_files=["res://.godot/imported/Steak_Frozen_DownRight.png-bdee43ccb252b095a3327514bb3cf237.ctex"]
 
 [params]
 

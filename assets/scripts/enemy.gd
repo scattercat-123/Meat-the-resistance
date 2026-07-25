@@ -9,6 +9,10 @@ const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
 @export var max_health := 30.0
 @export var contact_damage := 10.0
 
+const DASH_SPEED := 700.0
+const DASH_TIME := 0.3
+const TELEGRAPH_TIME := 0.65
+
 var last_animation_state = ""
 var health := 0.0
 var target: Node2D
@@ -18,13 +22,27 @@ var follow = true
 var angle
 var angle_deg
 var base_color: Color
+var base_speed := 0.0
+var dash_state := "none"
+var dash_dir := Vector2.ZERO
+var telegraph: Node2D
+var dash_timer: Timer
 
 func _ready() -> void:
 	randomize()
 	health = max_health
+	speed *= randf_range(0.85, 1.2)
+	base_speed = speed
 	target = get_tree().get_first_node_in_group("player")
 	change_state_timer.wait_time = randf_range(3, 5)
 	change_state_timer.start()
+
+	dash_timer = Timer.new()
+	dash_timer.one_shot = true
+	dash_timer.wait_time = randf_range(3.0, 8.0)
+	dash_timer.timeout.connect(_try_dash)
+	add_child(dash_timer)
+	dash_timer.start()
 
 func _physics_process(delta: float) -> void:
 	angle = velocity.angle()
@@ -32,21 +50,83 @@ func _physics_process(delta: float) -> void:
 	if knockback.length() > 10.0:
 		velocity = knockback
 		knockback = knockback.move_toward(Vector2.ZERO, 700.0 * delta)
+	elif dash_state == "telegraph":
+		velocity = Vector2.ZERO
+	elif dash_state == "dashing":
+		velocity = dash_dir * DASH_SPEED
 	elif target and follow:
 		velocity = (target.global_position - global_position).normalized() * speed
 		movement()
+	else:
+		velocity = Vector2.ZERO
 	move_and_slide()
 
 	var b := GameManager.arena_bound
 	global_position.x = clamp(global_position.x, -b.x, b.x)
 	global_position.y = clamp(global_position.y, -b.y, b.y)
 
+func _try_dash() -> void:
+	dash_timer.wait_time = randf_range(4.0, 9.0)
+	dash_timer.start()
+	if dying or dash_state != "none" or not follow or target == null:
+		return
+	if global_position.distance_to(target.global_position) > 700.0:
+		return
+	if not GameManager.request_dash_slot():
+		return
+	dash_state = "telegraph"
+	dash_dir = (target.global_position - global_position).normalized()
+	_show_telegraph()
+	await get_tree().create_timer(TELEGRAPH_TIME).timeout
+	if dying or dash_state != "telegraph":
+		return
+	dash_state = "dashing"
+	GameManager.play("dash", -10.0)
+	await get_tree().create_timer(DASH_TIME).timeout
+	_end_dash()
+
+func _show_telegraph() -> void:
+	telegraph = Node2D.new()
+	telegraph.position = global_position
+	telegraph.rotation = dash_dir.angle()
+	telegraph.z_index = 5
+	var r := ColorRect.new()
+	var reach := DASH_SPEED * DASH_TIME + 60.0
+	r.size = Vector2(reach, 46)
+	r.position = Vector2(0, -23)
+	r.color = Color(0.9, 0.15, 0.15, 0.3)
+	telegraph.add_child(r)
+	get_parent().add_child(telegraph)
+	var tw := r.create_tween()
+	tw.set_loops()
+	tw.tween_property(r, "color:a", 0.08, 0.12)
+	tw.tween_property(r, "color:a", 0.38, 0.12)
+
+func _end_dash() -> void:
+	if dash_state == "none":
+		return
+	dash_state = "none"
+	GameManager.release_dash_slot()
+	if is_instance_valid(telegraph):
+		telegraph.queue_free()
+	telegraph = null
+
 func apply_knockback(dir: Vector2, force: float) -> void:
 	knockback = dir * force
+
+func apply_slow(factor: float, duration: float) -> void:
+	speed = base_speed * factor
+	sprite.modulate = Color(0.6, 0.75, 1.0)
+	get_tree().create_timer(duration).timeout.connect(func():
+		if not dying and is_instance_valid(self):
+			speed = base_speed
+			sprite.modulate = Color.WHITE
+	)
 
 func take_damage(amount: float, from := Vector2.INF) -> void:
 	if dying:
 		return
+	_end_dash()
 	health -= amount
 	GameManager.play("hit")
 	if from != Vector2.INF:
@@ -57,7 +137,7 @@ func take_damage(amount: float, from := Vector2.INF) -> void:
 	_spawn_splatter()
 	if health <= 0:
 		die()
-		
+
 func _hit_flash() -> void:
 	sprite.modulate = Color(1.5, 0.2, 0.2, 1)
 	var tw := create_tween()
@@ -84,7 +164,7 @@ func _spawn_damage_number(amount: float) -> void:
 	tw.tween_property(l, "position:y", l.position.y - 55.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(l, "modulate:a", 0.0, 0.55).set_delay(0.15)
 	tw.chain().tween_callback(l.queue_free)
-	
+
 func _spawn_splatter() -> void:
 	var p := CPUParticles2D.new()
 	p.one_shot = true
@@ -106,6 +186,7 @@ func _spawn_splatter() -> void:
 	get_tree().create_timer(0.6).timeout.connect(p.queue_free)
 
 func die() -> void:
+	_end_dash()
 	dying = true
 	collision_layer = 0
 	contact_damage = 0.0
@@ -150,6 +231,8 @@ func movement():
 		sprite.play("walk_bottom_right")
 
 func change_state():
+	if dying:
+		return
 	var rand = randi_range(1,3)
 	if rand == 1:
 		follow = true
@@ -164,5 +247,9 @@ func change_state():
 		contact_damage = 0
 
 func idle(anim:String):
+	if anim == "":
+		return
+	if anim == "bottom":
+		anim = "back"
 	var acc_anim = "idle_" + anim
 	sprite.play(acc_anim)

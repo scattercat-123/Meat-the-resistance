@@ -246,6 +246,7 @@ func _on_player_died() -> void:
 	panel.add_child(restart)
 
 func _offer_upgrade() -> void:
+	await get_tree().create_timer(1.5).timeout
 	get_tree().paused = true
 	var choices := UPGRADES.duplicate()
 	choices.shuffle()
