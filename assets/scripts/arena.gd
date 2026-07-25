@@ -39,8 +39,29 @@ func _ready() -> void:
 	player.health_changed.connect(_on_health_changed)
 	player.died.connect(_on_player_died)
 	GameManager.enemy_died.connect(_check_wave_clear)
+	GameManager.hit_landed.connect(_shake_camera.bind(14.0))
+	GameManager.player_hurt.connect(_on_player_hurt)
 
 	_start_wave()
+
+func _shake_camera(base: float) -> void:
+	var cam := $Camera2D
+	var tw := create_tween()
+	for i in 4:
+		var strength := base * (1.0 - i / 4.0)
+		tw.tween_property(cam, "offset", Vector2(randf_range(-strength, strength), randf_range(-strength, strength)), 0.03)
+	tw.tween_property(cam, "offset", Vector2.ZERO, 0.04)
+
+func _on_player_hurt() -> void:
+	_shake_camera(24.0)
+	var flash := ColorRect.new()
+	flash.color = Color(0.75, 0.08, 0.08, 0.3)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud.add_child(flash)
+	var tw := flash.create_tween()
+	tw.tween_property(flash, "color:a", 0.0, 0.3)
+	tw.tween_callback(flash.queue_free)
 
 func _build_hud() -> void:
 	hud = CanvasLayer.new()
@@ -135,6 +156,7 @@ func _on_health_changed(hp: float, max_hp: float) -> void:
 
 func _on_player_died() -> void:
 	spawn_timer.stop()
+	GameManager.play("game_over")
 	get_tree().paused = true
 
 	var panel := _make_panel(Vector2(820, 460))
@@ -181,6 +203,7 @@ func _offer_upgrade() -> void:
 		panel.add_child(btn)
 
 func _pick_upgrade(upgrade_name: String, panel: Panel) -> void:
+	GameManager.play("upgrade")
 	player.apply_upgrade(upgrade_name)
 	panel.queue_free()
 	get_tree().paused = false
