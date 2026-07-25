@@ -25,6 +25,9 @@ const TOMATO_WAVE := 6
 
 var wave := 0
 var enemies_to_spawn := 0
+var wave_size := 0
+var wave_kills := 0
+var tomatoes_dropped := 0
 var spawn_timer: Timer
 var hud: CanvasLayer
 var wave_label: Label
@@ -201,12 +204,9 @@ func _start_wave() -> void:
 	enemies_to_spawn = 3 + wave * 2
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
-	if wave >= TOMATO_WAVE:
-		for i in 3:
-			var pickup := TOMATO_PICKUP_SCENE.instantiate()
-			var b := GameManager.arena_bound - Vector2(140, 140)
-			pickup.position = Vector2(randf_range(-b.x, b.x), randf_range(-b.y, b.y))
-			add_child(pickup)
+	wave_size = enemies_to_spawn
+	wave_kills = 0
+	tomatoes_dropped = 0
 	spawn_timer.start()
 
 func _spawn_one() -> void:
@@ -233,8 +233,19 @@ func _edge_spawn_point() -> Vector2:
 
 func _check_wave_clear() -> void:
 	score_label.text = "Grilled: %d" % GameManager.score
+	wave_kills += 1
+	if wave >= TOMATO_WAVE:
+		while tomatoes_dropped < 3 and wave_kills >= ceili(wave_size * 0.3 * (tomatoes_dropped + 1)):
+			_drop_tomato()
 	if GameManager.enemies_alive <= 0 and enemies_to_spawn <= 0:
 		_offer_upgrade()
+
+func _drop_tomato() -> void:
+	tomatoes_dropped += 1
+	var pickup := TOMATO_PICKUP_SCENE.instantiate()
+	var b := GameManager.arena_bound - Vector2(140, 140)
+	pickup.position = Vector2(randf_range(-b.x, b.x), randf_range(-b.y, b.y))
+	add_child(pickup)
 
 func _on_health_changed(hp: float, max_hp: float) -> void:
 	hp_label.text = "%d/%d" % [int(hp), int(max_hp)]
