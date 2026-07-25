@@ -220,6 +220,11 @@ func _spawn_one() -> void:
 	enemy.speed += minf(wave * 4.0, 100.0)
 	enemy.max_health += wave * 7.0 + wave * wave
 	enemy.damage_bonus = wave
+	var roll := randf()
+	if wave >= 7 and roll < 0.18:
+		enemy.make_variant("tank")
+	elif wave >= 4 and roll < 0.45:
+		enemy.make_variant("runner")
 	enemy.global_position = _edge_spawn_point()
 	add_child(enemy)
 	GameManager.enemies_alive += 1

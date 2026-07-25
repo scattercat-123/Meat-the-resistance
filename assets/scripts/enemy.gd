@@ -13,6 +13,8 @@ const DASH_SPEED := 700.0
 const DASH_TIME := 0.3
 const TELEGRAPH_TIME := 0.65
 
+const SIGN_TEXTS := ["GO VEGAN", "MEAT IS MURDER", "EAT KALE", "TOFU 4EVER", "SAVE THE COWS", "PLANT POWER"]
+
 var last_animation_state = ""
 var health := 0.0
 var target: Node2D
@@ -24,6 +26,7 @@ var angle_deg
 var base_color: Color
 var base_speed := 0.0
 var damage_bonus := 0.0
+var variant := "basic"
 var dash_state := "none"
 var dash_dir := Vector2.ZERO
 var telegraph: Node2D
@@ -44,6 +47,56 @@ func _ready() -> void:
 	dash_timer.timeout.connect(_try_dash)
 	add_child(dash_timer)
 	dash_timer.start()
+
+	if randf() < 0.4:
+		_make_sign()
+
+func make_variant(kind: String) -> void:
+	variant = kind
+	if kind == "runner":
+		speed *= 1.7
+		max_health *= 0.55
+		scale *= 0.8
+		modulate = Color(1.0, 1.05, 0.6)
+	elif kind == "tank":
+		speed *= 0.6
+		max_health *= 2.6
+		damage_bonus += 5.0
+		scale *= 1.35
+		modulate = Color(0.45, 0.75, 0.5)
+
+func _make_sign() -> void:
+	var holder := Node2D.new()
+	holder.z_index = 6
+	var stick := ColorRect.new()
+	stick.size = Vector2(1.2, 9.0)
+	stick.position = Vector2(-0.6, -17.0)
+	stick.color = Color(0.45, 0.3, 0.18)
+	holder.add_child(stick)
+
+	var txt: String = SIGN_TEXTS.pick_random()
+	var board := ColorRect.new()
+	var w := maxf(26.0, txt.length() * 4.2)
+	board.size = Vector2(w, 9.0)
+	board.position = Vector2(-w / 2.0, -25.0)
+	board.color = Color(0.92, 0.88, 0.8)
+	holder.add_child(board)
+
+	var l := Label.new()
+	l.text = txt
+	l.add_theme_font_override("font", FONT_PIXEL)
+	l.add_theme_font_size_override("font_size", 6)
+	l.add_theme_color_override("font_color", Color(0.15, 0.35, 0.15))
+	l.set_anchors_preset(Control.PRESET_FULL_RECT)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	board.add_child(l)
+
+	add_child(holder)
+	var tw := holder.create_tween()
+	tw.set_loops()
+	tw.tween_property(holder, "rotation", 0.09, 0.7).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(holder, "rotation", -0.09, 0.7).set_trans(Tween.TRANS_SINE)
 
 func _physics_process(delta: float) -> void:
 	angle = velocity.angle()
@@ -226,8 +279,25 @@ func _try_dash() -> void:
 		return
 	dash_state = "dashing"
 	GameManager.play("dash", -10.0)
+	var tw := create_tween()
+	tw.tween_property(sprite, "scale", Vector2(1.3, 0.75), 0.06)
+	_ghost_trail()
 	await get_tree().create_timer(DASH_TIME).timeout
 	_end_dash()
+
+func _ghost_trail() -> void:
+	while dash_state == "dashing" and not dying:
+		var g := Sprite2D.new()
+		g.texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+		g.global_position = sprite.global_position
+		g.scale = sprite.global_scale
+		g.modulate = Color(0.5, 1.0, 0.4, 0.5)
+		g.z_index = z_index - 1
+		get_parent().add_child(g)
+		var gt := g.create_tween()
+		gt.tween_property(g, "modulate:a", 0.0, 0.3)
+		gt.tween_callback(g.queue_free)
+		await get_tree().create_timer(0.04).timeout
 
 func _show_telegraph() -> void:
 	telegraph = Node2D.new()
@@ -254,3 +324,6 @@ func _end_dash() -> void:
 	if is_instance_valid(telegraph):
 		telegraph.queue_free()
 	telegraph = null
+	if not dying:
+		var tw := create_tween()
+		tw.tween_property(sprite, "scale", Vector2.ONE, 0.1)

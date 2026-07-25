@@ -153,11 +153,26 @@ func dash(dir: Vector2) -> void:
 	dash_dir = dir.normalized() if dir != Vector2.ZERO else facing
 	hurtbox.monitoring = false
 	anim.play("Roll" + _anim_name(dash_dir))
+	_ghost_trail()
 	await get_tree().create_timer(dash_time).timeout
 	dashing = false
 	hurtbox.monitoring = true
 	await get_tree().create_timer(dash_cooldown).timeout
 	can_dash = true
+
+func _ghost_trail() -> void:
+	while dashing:
+		var g := Sprite2D.new()
+		g.texture = anim.sprite_frames.get_frame_texture(anim.animation, anim.frame)
+		g.global_position = anim.global_position
+		g.scale = anim.global_scale
+		g.modulate = Color(0.91, 0.78, 0.66, 0.45)
+		g.z_index = z_index - 1
+		get_parent().add_child(g)
+		var tw := g.create_tween()
+		tw.tween_property(g, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(g.queue_free)
+		await get_tree().create_timer(0.035).timeout
 
 func dash_progress() -> float:
 	if can_dash:
