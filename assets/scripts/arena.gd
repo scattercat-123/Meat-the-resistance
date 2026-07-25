@@ -251,7 +251,7 @@ func _drop_tomato() -> void:
 	var pickup := TOMATO_PICKUP_SCENE.instantiate()
 	var b := GameManager.arena_bound - Vector2(140, 140)
 	pickup.position = Vector2(randf_range(-b.x, b.x), randf_range(-b.y, b.y))
-	add_child(pickup)
+	add_child.call_deferred(pickup)
 
 func _on_health_changed(hp: float, max_hp: float) -> void:
 	hp_label.text = "%d/%d" % [int(hp), int(max_hp)]
