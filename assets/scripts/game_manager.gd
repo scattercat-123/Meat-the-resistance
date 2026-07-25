@@ -12,6 +12,7 @@ const SFX := {
 	"enemy_die": preload("res://assets/audio/enemy_die.wav"),
 	"upgrade": preload("res://assets/audio/upgrade.wav"),
 	"game_over": preload("res://assets/audio/game_over.wav"),
+	"splat": preload("res://assets/audio/splat.wav"),
 }
 
 var score := 0

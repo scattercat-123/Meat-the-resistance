@@ -39,7 +39,11 @@ const WEAPONS := {
 @onready var hitbox: Area2D = $Aim/WeaponHitbox
 @onready var hurtbox: Area2D = $Hurtbox
 
+const TOMATO_SCENE := preload("res://assets/scenes/tomato.tscn")
+
 var health := 0.0
+var tomato_damage := 0.0
+var tomato_timer: Timer
 var can_attack := true
 var attacking := false
 var weapon := "raw"
@@ -64,6 +68,11 @@ func _ready() -> void:
 	damage_cooldown.wait_time = 0.6
 	damage_cooldown.one_shot = true
 	add_child(damage_cooldown)
+
+	tomato_timer = Timer.new()
+	tomato_timer.wait_time = 2.2
+	tomato_timer.timeout.connect(_throw_tomato)
+	add_child(tomato_timer)
 
 func _build_char_frames() -> SpriteFrames:
 	var sf := SpriteFrames.new()
@@ -223,6 +232,28 @@ func _handle_contacts() -> void:
 				dir = Vector2.RIGHT.rotated(randf() * TAU)
 			body.apply_knockback(dir, 650.0)
 
+func _throw_tomato() -> void:
+	var best: Node2D
+	var best_d := 900.0
+	for n in get_parent().get_children():
+		if n.has_method("apply_knockback") and not n.dying:
+			var d := global_position.distance_to(n.global_position)
+			if d < best_d:
+				best_d = d
+				best = n
+	if best == null:
+		return
+	var t := TOMATO_SCENE.instantiate()
+	t.global_position = global_position
+	t.target = best
+	t.damage = tomato_damage
+	get_parent().add_child(t)
+	GameManager.play("swing", -12.0)
+
+func heal(amount: float) -> void:
+	health = minf(health + amount, max_health)
+	health_changed.emit(health, max_health)
+
 func take_damage(amount: float) -> void:
 	health = max(health - amount, 0.0)
 	health_changed.emit(health, max_health)
@@ -244,22 +275,32 @@ func _damage_flash() -> void:
 func apply_upgrade(upgrade_name: String) -> void:
 	match upgrade_name:
 		"Bigger steak":
-			attack_damage += 10
+			attack_damage *= 1.25
 		"Double swing":
-			attack_cooldown *= 0.6
+			attack_cooldown = maxf(attack_cooldown * 0.7, 0.08)
 		"Thick hide":
-			max_health += 20
+			max_health += 25
 			health = max_health
 			health_changed.emit(health, max_health)
 		"Fast legs":
 			speed += 40
 		"Flaming steak":
-			attack_damage += 15
+			attack_damage *= 1.35
 		"Long reach":
 			reach_bonus *= 1.2
 			set_weapon(weapon)
-			attack_cooldown *= 0.85
+			attack_cooldown = maxf(attack_cooldown * 0.85, 0.08)
 		"Frozen steak":
 			set_weapon("frozen")
 		"Bone-in steak":
 			set_weapon("bone")
+		"Protein shake":
+			attack_damage *= 1.15
+			speed += 35
+		"Tomato launcher":
+			if tomato_damage == 0.0:
+				tomato_damage = 25.0
+				tomato_timer.start()
+			else:
+				tomato_damage *= 1.5
+				tomato_timer.wait_time = maxf(tomato_timer.wait_time * 0.75, 0.6)
