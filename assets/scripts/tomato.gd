@@ -1,24 +1,22 @@
 extends Node2D
 
-var target: Node2D
-var damage := 25.0
-var speed := 520.0
-var last_dir := Vector2.RIGHT
+var dir := Vector2.RIGHT
+var damage := 10.0
+var speed := 700.0
 
 func _process(delta: float) -> void:
-	rotation += 12.0 * delta
-	if is_instance_valid(target) and not target.dying:
-		last_dir = (target.global_position - global_position).normalized()
-		if global_position.distance_to(target.global_position) < 30.0:
-			_splat()
+	rotation += 14.0 * delta
+	global_position += dir * speed * delta
+	for n in get_parent().get_children():
+		if n.has_method("apply_knockback") and not n.dying and global_position.distance_to(n.global_position) < 40.0:
+			_splat(n)
 			return
-	global_position += last_dir * speed * delta
 	var b := GameManager.arena_bound
 	if absf(global_position.x) > b.x + 40.0 or absf(global_position.y) > b.y + 40.0:
 		queue_free()
 
-func _splat() -> void:
-	target.take_damage(damage, global_position)
+func _splat(victim: Node2D) -> void:
+	victim.take_damage(damage, global_position)
 	GameManager.play("splat", -2.0)
 	var p := CPUParticles2D.new()
 	p.one_shot = true

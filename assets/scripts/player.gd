@@ -42,8 +42,7 @@ const WEAPONS := {
 const TOMATO_SCENE := preload("res://assets/scenes/tomato.tscn")
 
 var health := 0.0
-var tomato_damage := 0.0
-var tomato_timer: Timer
+var tomatoes := 0
 var can_attack := true
 var attacking := false
 var weapon := "raw"
@@ -68,11 +67,6 @@ func _ready() -> void:
 	damage_cooldown.wait_time = 0.6
 	damage_cooldown.one_shot = true
 	add_child(damage_cooldown)
-
-	tomato_timer = Timer.new()
-	tomato_timer.wait_time = 2.2
-	tomato_timer.timeout.connect(_throw_tomato)
-	add_child(tomato_timer)
 
 func _build_char_frames() -> SpriteFrames:
 	var sf := SpriteFrames.new()
@@ -147,6 +141,9 @@ func _physics_process(_delta: float) -> void:
 
 	if can_attack and not dashing and Input.is_action_just_pressed("attack"):
 		attack()
+
+	if tomatoes > 0 and not dashing and Input.is_action_just_pressed("throw"):
+		throw_tomato()
 
 func dash(dir: Vector2) -> void:
 	can_dash = false
@@ -232,21 +229,11 @@ func _handle_contacts() -> void:
 				dir = Vector2.RIGHT.rotated(randf() * TAU)
 			body.apply_knockback(dir, 650.0)
 
-func _throw_tomato() -> void:
-	var best: Node2D
-	var best_d := 900.0
-	for n in get_parent().get_children():
-		if n.has_method("apply_knockback") and not n.dying:
-			var d := global_position.distance_to(n.global_position)
-			if d < best_d:
-				best_d = d
-				best = n
-	if best == null:
-		return
+func throw_tomato() -> void:
+	tomatoes -= 1
 	var t := TOMATO_SCENE.instantiate()
 	t.global_position = global_position
-	t.target = best
-	t.damage = tomato_damage
+	t.dir = (get_global_mouse_position() - global_position).normalized()
 	get_parent().add_child(t)
 	GameManager.play("swing", -12.0)
 
@@ -297,10 +284,3 @@ func apply_upgrade(upgrade_name: String) -> void:
 		"Protein shake":
 			attack_damage *= 1.15
 			speed += 35
-		"Tomato launcher":
-			if tomato_damage == 0.0:
-				tomato_damage = 25.0
-				tomato_timer.start()
-			else:
-				tomato_damage *= 1.5
-				tomato_timer.wait_time = maxf(tomato_timer.wait_time * 0.75, 0.6)
