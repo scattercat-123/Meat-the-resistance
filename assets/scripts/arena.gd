@@ -104,13 +104,13 @@ func _process(_delta: float) -> void:
 		return
 	var p: float = player.dash_progress()
 	dash_fill.size.x = 194.0 * p
-	var ready := p >= 1.0
-	dash_fill.color = CREAM if ready else MEAT_RED
-	if ready and not dash_was_ready:
+	var dash_ready := p >= 1.0
+	dash_fill.color = CREAM if dash_ready else MEAT_RED
+	if dash_ready and not dash_was_ready:
 		var tw := dash_fill.create_tween()
 		tw.tween_property(dash_fill, "scale", Vector2(1.15, 1.5), 0.08)
 		tw.tween_property(dash_fill, "scale", Vector2.ONE, 0.1)
-	dash_was_ready = ready
+	dash_was_ready = dash_ready
 
 func _make_label(txt: String, font: Font, size: int, color: Color) -> Label:
 	var l := Label.new()
