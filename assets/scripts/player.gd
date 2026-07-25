@@ -30,6 +30,7 @@ var attacking := false
 var dashing := false
 var can_dash := true
 var dash_dir := Vector2.DOWN
+var dash_ready_at := 0
 var facing := Vector2.DOWN
 var damage_cooldown: Timer
 
@@ -116,6 +117,7 @@ func _physics_process(_delta: float) -> void:
 func dash(dir: Vector2) -> void:
 	can_dash = false
 	dashing = true
+	dash_ready_at = Time.get_ticks_msec() + int((dash_time + dash_cooldown) * 1000.0)
 	GameManager.play("dash", -6.0)
 	dash_dir = dir.normalized() if dir != Vector2.ZERO else facing
 	hurtbox.monitoring = false
@@ -125,6 +127,12 @@ func dash(dir: Vector2) -> void:
 	hurtbox.monitoring = true
 	await get_tree().create_timer(dash_cooldown).timeout
 	can_dash = true
+
+func dash_progress() -> float:
+	if can_dash:
+		return 1.0
+	var total := (dash_time + dash_cooldown) * 1000.0
+	return clampf(1.0 - (dash_ready_at - Time.get_ticks_msec()) / total, 0.0, 1.0)
 
 func _anim_name(d: Vector2) -> String:
 	var deg := rad_to_deg(d.angle())

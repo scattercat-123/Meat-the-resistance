@@ -23,6 +23,9 @@ var spawn_timer: Timer
 var hud: CanvasLayer
 var wave_label: Label
 var hp_label: Label
+var hp_fill: ColorRect
+var dash_fill: ColorRect
+var dash_was_ready := true
 var player: CharacterBody2D
 
 func _ready() -> void:
@@ -71,9 +74,54 @@ func _build_hud() -> void:
 	wave_label.position = Vector2(32, 24)
 	hud.add_child(wave_label)
 
-	hp_label = _make_label("", FONT_PIXEL, 44, CREAM)
-	hp_label.position = Vector2(32, 78)
+	var hp_title := _make_label("HP", FONT_PIXEL, 28, Color(0.65, 0.65, 0.7))
+	hp_title.position = Vector2(32, 86)
+	hud.add_child(hp_title)
+
+	hp_fill = _make_bar(Vector2(130, 88), Vector2(300, 30))
+
+	hp_label = _make_label("", FONT_PIXEL, 24, CREAM)
+	hp_label.position = Vector2(444, 90)
 	hud.add_child(hp_label)
+
+	var dash_label := _make_label("Dash", FONT_PIXEL, 28, Color(0.65, 0.65, 0.7))
+	dash_label.position = Vector2(32, 136)
+	hud.add_child(dash_label)
+
+	dash_fill = _make_bar(Vector2(130, 142), Vector2(200, 22))
+
+func _make_bar(pos: Vector2, size: Vector2) -> ColorRect:
+	var bg := Panel.new()
+	bg.position = pos
+	bg.size = size
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.12, 0.12, 0.15)
+	sb.border_color = Color(0.35, 0.35, 0.4)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(5)
+	bg.add_theme_stylebox_override("panel", sb)
+	hud.add_child(bg)
+
+	var fill := ColorRect.new()
+	fill.position = Vector2(3, 3)
+	fill.size = size - Vector2(6, 6)
+	fill.color = CREAM
+	fill.pivot_offset = (size - Vector2(6, 6)) / 2.0
+	bg.add_child(fill)
+	return fill
+
+func _process(_delta: float) -> void:
+	if not is_instance_valid(player):
+		return
+	var p: float = player.dash_progress()
+	dash_fill.size.x = (dash_fill.get_parent().size.x - 6.0) * p
+	var dash_ready := p >= 1.0
+	dash_fill.color = CREAM if dash_ready else MEAT_RED
+	if dash_ready and not dash_was_ready:
+		var tw := dash_fill.create_tween()
+		tw.tween_property(dash_fill, "scale", Vector2(1.15, 1.5), 0.08)
+		tw.tween_property(dash_fill, "scale", Vector2.ONE, 0.1)
+	dash_was_ready = dash_ready
 
 func _make_label(txt: String, font: Font, size: int, color: Color) -> Label:
 	var l := Label.new()
@@ -152,7 +200,17 @@ func _check_wave_clear() -> void:
 		_offer_upgrade()
 
 func _on_health_changed(hp: float, max_hp: float) -> void:
-	hp_label.text = "HP %d/%d" % [int(hp), int(max_hp)]
+	hp_label.text = "%d/%d" % [int(hp), int(max_hp)]
+	var ratio := hp / max_hp
+	var full_w: float = hp_fill.get_parent().size.x - 6.0
+	var tw := hp_fill.create_tween()
+	tw.tween_property(hp_fill, "size:x", full_w * ratio, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	if ratio > 0.5:
+		hp_fill.color = CREAM
+	elif ratio > 0.25:
+		hp_fill.color = Color(0.9, 0.6, 0.2)
+	else:
+		hp_fill.color = MEAT_RED
 
 func _on_player_died() -> void:
 	spawn_timer.stop()
