@@ -39,6 +39,7 @@ func take_damage(amount: float, from := Vector2.INF) -> void:
 	if dying:
 		return
 	health -= amount
+	GameManager.play("hit")
 	if from != Vector2.INF:
 		apply_knockback((global_position - from).normalized(), 420.0)
 	_hit_flash()
@@ -100,6 +101,7 @@ func die() -> void:
 	collision_layer = 0
 	contact_damage = 0.0
 	set_physics_process(false)
+	GameManager.play("enemy_die", -3.0)
 	GameManager.on_enemy_died()
 	var tw := create_tween()
 	tw.set_parallel(true)

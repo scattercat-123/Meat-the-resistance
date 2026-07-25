@@ -116,6 +116,7 @@ func _physics_process(_delta: float) -> void:
 func dash(dir: Vector2) -> void:
 	can_dash = false
 	dashing = true
+	GameManager.play("dash", -6.0)
 	dash_dir = dir.normalized() if dir != Vector2.ZERO else facing
 	hurtbox.monitoring = false
 	anim.play("Roll" + _anim_name(dash_dir))
@@ -144,6 +145,7 @@ func _slash_dir(d: Vector2) -> String:
 func attack() -> void:
 	can_attack = false
 	attacking = true
+	GameManager.play("swing", -4.0)
 	var aim_dir := (get_global_mouse_position() - global_position).normalized()
 	aim.rotation = aim_dir.angle()
 	var d := _slash_dir(aim_dir)
@@ -188,6 +190,18 @@ func take_damage(amount: float) -> void:
 	health_changed.emit(health, max_health)
 	if health <= 0.0:
 		died.emit()
+		return
+	GameManager.play("hurt")
+	GameManager.player_hurt.emit()
+	_damage_flash()
+
+func _damage_flash() -> void:
+	modulate = Color(1.0, 0.25, 0.25)
+	var tw := create_tween()
+	tw.tween_property(self, "modulate", Color.WHITE, 0.15)
+	for i in 3:
+		tw.tween_property(self, "modulate:a", 0.35, 0.07)
+		tw.tween_property(self, "modulate:a", 1.0, 0.07)
 
 func apply_upgrade(upgrade_name: String) -> void:
 	match upgrade_name:
