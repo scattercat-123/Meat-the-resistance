@@ -340,11 +340,11 @@ func _end_screen(win: bool) -> void:
 	var steak := Sprite2D.new()
 	steak.texture = preload("res://assets/images/weapon/steak.png")
 	steak.scale = Vector2(4, 4)
-	steak.position = Vector2(panel.size.x - 110, -220)
+	steak.position = Vector2(panel.size.x - 105, -220)
 	steak.rotation = 0.35
 	panel.add_child(steak)
 	var st := steak.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	st.tween_property(steak, "position:y", 95.0, 0.6).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	st.tween_property(steak, "position:y", panel.size.y - 88.0, 0.6).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	st.tween_callback(func():
 		var wob := steak.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		wob.set_loops()
