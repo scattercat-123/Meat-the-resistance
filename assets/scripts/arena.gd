@@ -245,7 +245,7 @@ func _spawn_one() -> void:
 	GameManager.enemies_alive += 1
 
 func _edge_spawn_point() -> Vector2:
-	var b := GameManager.arena_bound
+	var b := GameManager.arena_bound + Vector2(120, 120)
 	match randi() % 4:
 		0: return Vector2(randf_range(-b.x, b.x), -b.y)
 		1: return Vector2(randf_range(-b.x, b.x), b.y)

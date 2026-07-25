@@ -30,6 +30,7 @@ var damage_bonus := 0.0
 var variant := "basic"
 var casting := false
 var lob_pending := false
+var entered := false
 var dash_state := "none"
 var dash_dir := Vector2.ZERO
 var telegraph: Node2D
@@ -92,7 +93,7 @@ func _try_lob() -> void:
 	var t: Timer = get_node("ability_timer")
 	t.wait_time = randf_range(4.0, 8.0)
 	t.start()
-	if dying or target == null or dash_state != "none" or casting:
+	if dying or target == null or dash_state != "none" or casting or not entered:
 		return
 	var dist := global_position.distance_to(target.global_position)
 	if dist > 850.0 or dist < 160.0:
@@ -233,16 +234,20 @@ func _physics_process(delta: float) -> void:
 		velocity = dash_dir * DASH_SPEED
 	elif casting:
 		velocity = Vector2.ZERO
-	elif target and follow:
-		velocity = (target.global_position - global_position).normalized() * speed
-		movement()
+	elif not entered or (target and follow):
+		if target:
+			velocity = (target.global_position - global_position).normalized() * speed
+			movement()
 	else:
 		velocity = Vector2.ZERO
 	move_and_slide()
 
 	var b := GameManager.arena_bound
-	global_position.x = clamp(global_position.x, -b.x, b.x)
-	global_position.y = clamp(global_position.y, -b.y, b.y)
+	if entered:
+		global_position.x = clamp(global_position.x, -b.x, b.x)
+		global_position.y = clamp(global_position.y, -b.y, b.y)
+	elif absf(global_position.x) <= b.x and absf(global_position.y) <= b.y:
+		entered = true
 
 func apply_knockback(dir: Vector2, force: float) -> void:
 	knockback = dir * force
@@ -393,7 +398,7 @@ func idle(anim:String):
 func _try_dash() -> void:
 	dash_timer.wait_time = randf_range(4.0, 9.0)
 	dash_timer.start()
-	if dying or dash_state != "none" or not follow or target == null:
+	if dying or dash_state != "none" or not follow or target == null or not entered:
 		return
 	if global_position.distance_to(target.global_position) > 700.0:
 		return
