@@ -63,7 +63,7 @@ func _on_hurtbox_body_entered(body: Node) -> void:
 		damage_cooldown.start()
 		if body.has_method("apply_knockback"):
 			var dir: Vector2 = (body.global_position - global_position).normalized()
-			body.apply_knockback(dir, 350.0)
+			body.apply_knockback(dir, 650.0)
 
 func take_damage(amount: float) -> void:
 	health = max(health - amount, 0.0)
