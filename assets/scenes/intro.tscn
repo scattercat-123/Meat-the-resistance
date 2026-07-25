@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://bax0lb0cb0686"]
 
-[ext_resource type="FontFile" uid="uid://r7gwhsuio0da" path="res://Assets/fonts/Singsong.otf" id="1_egymn"]
-[ext_resource type="VideoStream" uid="uid://1egkxnf6at38" path="res://Assets/images/200YEA_1.ogv" id="1_rckak"]
-[ext_resource type="Texture2D" uid="uid://ingjyfwfde6x" path="res://Assets/images/HumanSteak_Raw.png" id="2_w8vp1"]
-[ext_resource type="Texture2D" uid="uid://v0f5k71vray0" path="res://Assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png" id="3_rckak"]
-[ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://Assets/fonts/pixelart.ttf" id="4_ts36g"]
-[ext_resource type="Script" uid="uid://cief84a7ysoyp" path="res://Assets/scripts/menu.gd" id="4_w8vp1"]
-[ext_resource type="PackedScene" uid="uid://bx8t58svlciqx" path="res://Assets/scenes/music.tscn" id="7_ts36g"]
+[ext_resource type="FontFile" uid="uid://r7gwhsuio0da" path="res://assets/fonts/Singsong.otf" id="1_egymn"]
+[ext_resource type="VideoStream" uid="uid://1egkxnf6at38" path="res://assets/images/200YEA_1.ogv" id="1_rckak"]
+[ext_resource type="Texture2D" uid="uid://ingjyfwfde6x" path="res://assets/images/HumanSteak_Raw.png" id="2_w8vp1"]
+[ext_resource type="Texture2D" uid="uid://v0f5k71vray0" path="res://assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png" id="3_rckak"]
+[ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://assets/fonts/pixelart.ttf" id="4_ts36g"]
+[ext_resource type="Script" uid="uid://cief84a7ysoyp" path="res://assets/scripts/menu.gd" id="4_w8vp1"]
+[ext_resource type="PackedScene" uid="uid://bx8t58svlciqx" path="res://assets/scenes/music.tscn" id="7_ts36g"]
 
 [sub_resource type="Animation" id="Animation_58f7j"]
 length = 0.001
@@ -133,10 +133,10 @@ tracks/0/path = NodePath("Warning texts:modulate")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1, 2),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 1, 4.5, 5.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -145,10 +145,10 @@ tracks/1/path = NodePath("Vegan Games:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(2, 3, 4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(5.5, 6.5, 7.8, 8.8),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -157,7 +157,7 @@ tracks/2/path = NodePath("Background:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(4, 5),
+"times": PackedFloat32Array(8.8, 9.6),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Color(0.7764706, 0.7764706, 0.7764706, 0), Color(0.7764706, 0.7764706, 0.7764706, 1)]
@@ -169,7 +169,7 @@ tracks/3/path = NodePath("Menu:position")
 tracks/3/interp = 2
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(4.55, 5.28),
+"times": PackedFloat32Array(9, 9.73),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector2(564.00006, -1071), Vector2(-6, -20)]
@@ -181,7 +181,7 @@ tracks/4/path = NodePath("Menu:rotation")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(4.55, 5.28),
+"times": PackedFloat32Array(9, 9.73),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [0.17453292, 0.0]

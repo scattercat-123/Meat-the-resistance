@@ -3,12 +3,12 @@
 importer="mp3"
 type="AudioStreamMP3"
 uid="uid://cxhuqxttllt3x"
-path="res://.godot/imported/the_mountain-game-game-music-508018.mp3-d902f8c6d82741d5915143963343f786.mp3str"
+path="res://.godot/imported/the_mountain-game-game-music-508018.mp3-5b5aca3838dbbac6706d3e69735a9a71.mp3str"
 
 [deps]
 
-source_file="res://Assets/audio/the_mountain-game-game-music-508018.mp3"
-dest_files=["res://.godot/imported/the_mountain-game-game-music-508018.mp3-d902f8c6d82741d5915143963343f786.mp3str"]
+source_file="res://assets/audio/the_mountain-game-game-music-508018.mp3"
+dest_files=["res://.godot/imported/the_mountain-game-game-music-508018.mp3-5b5aca3838dbbac6706d3e69735a9a71.mp3str"]
 
 [params]
 

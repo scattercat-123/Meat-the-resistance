@@ -23,6 +23,7 @@ var angle
 var angle_deg
 var base_color: Color
 var base_speed := 0.0
+var damage_bonus := 0.0
 var dash_state := "none"
 var dash_dir := Vector2.ZERO
 var telegraph: Node2D
@@ -31,6 +32,7 @@ var dash_timer: Timer
 func _ready() -> void:
 	randomize()
 	health = max_health
+	contact_damage += damage_bonus
 	target = get_tree().get_first_node_in_group("player")
 	change_state_timer.wait_time = randf_range(3, 5)
 	change_state_timer.start()
@@ -180,12 +182,12 @@ func change_state():
 	var rand = randi_range(1,3)
 	if rand == 1:
 		follow = true
-		contact_damage = 10
+		contact_damage = 10 + damage_bonus
 	elif rand == 2:
 		follow = false
 		velocity = Vector2.ZERO
 		idle(last_animation_state)
-		contact_damage = 15
+		contact_damage = 15 + damage_bonus
 	elif rand == 3:
 		follow = true
 		contact_damage = 0
@@ -200,6 +202,10 @@ func apply_slow(factor: float, duration: float) -> void:
 	)
 
 func idle(anim:String):
+	if anim == "":
+		return
+	if anim == "bottom":
+		anim = "back"
 	var acc_anim = "idle_" + anim
 	sprite.play(acc_anim)
 
