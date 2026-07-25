@@ -9,6 +9,7 @@ const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
 @export var max_health := 30.0
 @export var contact_damage := 10.0
 
+var last_animation_state = ""
 var health := 0.0
 var target: Node2D
 var knockback := Vector2.ZERO
@@ -124,20 +125,28 @@ func _on_change_state_timer_timeout() -> void:
 
 func movement():
 	if angle_deg >= -22.5 and angle_deg < 22.5:
+		last_animation_state = "right"
 		sprite.play("walk_right")
 	elif angle_deg >= 22.5 and angle_deg < 67.5:
+		last_animation_state = "front_right"
 		sprite.play("walk_front_right")
 	elif angle_deg >= 67.5 and angle_deg < 112.5:
+		last_animation_state = "front"
 		sprite.play("walk_front")
 	elif angle_deg >= 112.5 and angle_deg < 157.5:
+		last_animation_state = "front_left"
 		sprite.play("walk_front_left")
 	elif angle_deg >= 157.5 or angle_deg < -157.5:
+		last_animation_state = "left"
 		sprite.play("walk_left")
 	elif angle_deg >= -157.5 and angle_deg < -112.5:
+		last_animation_state = "bottom_left"
 		sprite.play("walk_bottom_left")
 	elif angle_deg >= -112.5 and angle_deg < -67.5:
+		last_animation_state = "bottom"
 		sprite.play("walk_bottom")
 	elif angle_deg >= -67.5 and angle_deg < -22.5:
+		last_animation_state = "bottom_right"
 		sprite.play("walk_bottom_right")
 
 func change_state():
@@ -148,7 +157,12 @@ func change_state():
 	elif rand == 2:
 		follow = false
 		velocity = Vector2.ZERO
+		idle(last_animation_state)
 		contact_damage = 15
 	elif rand == 3:
 		follow = true
 		contact_damage = 0
+
+func idle(anim:String):
+	var acc_anim = "idle_" + anim
+	sprite.play(acc_anim)
