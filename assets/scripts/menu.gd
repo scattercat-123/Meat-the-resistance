@@ -11,6 +11,7 @@ var skippable = false
 
 
 func _ready() -> void:
+	get_tree().paused = false
 	Input.warp_mouse(mouse_pos.position)
 
 func _process(_delta: float) -> void:
@@ -23,10 +24,11 @@ func _process(_delta: float) -> void:
 		Music.hold()
 		animation_player.play("play")
 		await animation_player.animation_finished
-		skip_label.visible = true
-		animation_player.play("blink")
 		cutscene.visible = true
 		cutscene.play()
+		await get_tree().create_timer(1.0).timeout
+		skip_label.visible = true
+		animation_player.play("blink")
 		skippable = true
 		await cutscene.finished
 		skip_label.visible = false
