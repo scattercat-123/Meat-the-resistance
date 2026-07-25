@@ -22,6 +22,22 @@ const UPGRADES := [
 
 const TOMATO_PICKUP_SCENE := preload("res://assets/scenes/tomato_pickup.tscn")
 const TOMATO_WAVE := 6
+const FINAL_WAVE := 10
+
+const LINES_LOSE := [
+	"COMPOSTED.",
+	"The vegans turned you into fertilizer.",
+	"Your steak now belongs to a salad bar.",
+	"Beaten by people who don't even lift.",
+	"Death by broccoli. Embarrassing.",
+	"They are reading you tofu recipes. All of them.",
+]
+const LINES_WIN := [
+	"The resistance has been MEATED.",
+	"Vegans: 0 - Steak: everything.",
+	"You grilled your way to freedom.",
+	"Word is their Supreme Tofu leader escaped...",
+]
 
 var wave := 0
 var enemies_to_spawn := 0
@@ -175,6 +191,13 @@ func _make_panel(size: Vector2) -> Panel:
 	sb.set_corner_radius_all(16)
 	panel.add_theme_stylebox_override("panel", sb)
 	hud.add_child(panel)
+	panel.pivot_offset = size / 2.0
+	panel.scale = Vector2(0.8, 0.8)
+	panel.modulate.a = 0.0
+	var tw := panel.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.set_parallel(true)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.15)
 	return panel
 
 func _make_button(txt: String, size: Vector2) -> Button:
@@ -259,7 +282,10 @@ func _check_wave_clear() -> void:
 		while tomatoes_dropped < 3 and wave_kills >= ceili(wave_size * 0.3 * (tomatoes_dropped + 1)):
 			_drop_tomato()
 	if GameManager.enemies_alive <= 0 and enemies_to_spawn <= 0:
-		_offer_upgrade()
+		if wave >= FINAL_WAVE:
+			_end_screen(true)
+		else:
+			_offer_upgrade()
 
 func _drop_tomato() -> void:
 	tomatoes_dropped += 1
@@ -282,31 +308,59 @@ func _on_health_changed(hp: float, max_hp: float) -> void:
 		hp_fill.color = MEAT_RED
 
 func _on_player_died() -> void:
+	_end_screen(false)
+
+func _end_screen(win: bool) -> void:
 	spawn_timer.stop()
-	GameManager.play("game_over")
+	GameManager.play("upgrade" if win else "game_over")
 	get_tree().paused = true
 
-	var panel := _make_panel(Vector2(820, 460))
+	var panel := _make_panel(Vector2(920, 600))
 
-	var title := _make_label("Game Over", FONT_TITLE, 110, MEAT_RED)
+	var title := _make_label("VICTORY" if win else "GAME OVER", FONT_TITLE, 110, CREAM if win else MEAT_RED)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	title.offset_top = 30
+	title.offset_top = 25
 	panel.add_child(title)
 
-	var sub := _make_label("You survived %d waves" % (wave - 1), FONT_PIXEL, 42, CREAM)
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	sub.offset_top = 200
-	panel.add_child(sub)
+	var quip_text: String = LINES_WIN.pick_random() if win else LINES_LOSE.pick_random()
+	var quip := _make_label(quip_text, FONT_PIXEL, 32, Color(0.78, 0.78, 0.84))
+	quip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	quip.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	quip.offset_top = 205
+	panel.add_child(quip)
 
-	var restart := _make_button("Play again", Vector2(400, 90))
-	restart.position = Vector2((panel.size.x - 400) / 2.0, 310)
-	restart.pressed.connect(func():
-		get_tree().paused = false
-		get_tree().reload_current_scene()
+	var survived := wave if win else wave - 1
+	var stats := _make_label("Waves: %d      Grilled: %d" % [survived, GameManager.score], FONT_PIXEL, 42, CREAM)
+	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	stats.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	stats.offset_top = 275
+	panel.add_child(stats)
+
+	var steak := Sprite2D.new()
+	steak.texture = preload("res://assets/images/weapon/steak.png")
+	steak.scale = Vector2(4, 4)
+	steak.position = Vector2(panel.size.x - 110, -220)
+	steak.rotation = 0.35
+	panel.add_child(steak)
+	var st := steak.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	st.tween_property(steak, "position:y", 95.0, 0.6).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	st.tween_callback(func():
+		var wob := steak.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		wob.set_loops()
+		wob.tween_property(steak, "rotation", 0.5, 0.9).set_trans(Tween.TRANS_SINE)
+		wob.tween_property(steak, "rotation", 0.2, 0.9).set_trans(Tween.TRANS_SINE)
 	)
+
+	var restart := _make_button("Play again", Vector2(400, 85))
+	restart.position = Vector2((panel.size.x - 400) / 2.0, 370)
+	restart.pressed.connect(func(): Transition.swipe_to(""))
 	panel.add_child(restart)
+
+	var menu_btn := _make_button("Back to menu", Vector2(400, 75))
+	menu_btn.position = Vector2((panel.size.x - 400) / 2.0, 480)
+	menu_btn.pressed.connect(func(): Transition.swipe_to("res://assets/scenes/intro.tscn"))
+	panel.add_child(menu_btn)
 
 func _offer_upgrade() -> void:
 	await get_tree().create_timer(1.5).timeout

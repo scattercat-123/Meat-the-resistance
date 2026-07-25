@@ -16,9 +16,8 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if skippable == true and Input.is_action_just_pressed("attack"):
-		animation_player.play("out")
-		await animation_player.animation_finished
-		get_tree().change_scene_to_file("res://assets/scenes/arena.tscn")
+		skippable = false
+		Transition.swipe_to("res://assets/scenes/arena.tscn")
 	
 	if play_button_hover and Input.is_action_just_pressed("attack"):
 		Music.hold()
@@ -32,9 +31,7 @@ func _process(_delta: float) -> void:
 		skippable = true
 		await cutscene.finished
 		skip_label.visible = false
-		animation_player.play("out")
-		await animation_player.animation_finished
-		get_tree().change_scene_to_file("res://assets/scenes/arena.tscn")
+		Transition.swipe_to("res://assets/scenes/arena.tscn")
 		
 
 func _on_play_area_mouse_entered() -> void:
