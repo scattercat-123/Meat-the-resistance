@@ -236,8 +236,8 @@ func _spawn_one() -> void:
 		enemy.make_variant("lobber")
 	elif wave >= 4 and roll < 0.52 + lob_chance:
 		enemy.make_variant("runner")
-	var first_of_run := wave == 1 and enemies_to_spawn == wave_size - 1
-	if wave <= 8 and signs_this_wave < 3 and (first_of_run or randf() < 0.3):
+	var first_of_wave := enemies_to_spawn == wave_size - 1
+	if first_of_wave or (signs_this_wave < 2 and randf() < 0.12):
 		enemy.carry_sign()
 		signs_this_wave += 1
 	enemy.global_position = _edge_spawn_point()
