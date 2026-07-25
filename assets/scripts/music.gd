@@ -19,6 +19,8 @@ const TRACKS := [
 var order := []
 var idx := 0
 var paused := false
+var held := false
+var ui_layer: CanvasLayer
 var player: AudioStreamPlayer
 var name_label: Label
 var bar_fill: ColorRect
@@ -39,10 +41,24 @@ func _ready() -> void:
 	_build_ui()
 	_play_current()
 
+func hold() -> void:
+	held = true
+	player.stream_paused = true
+	ui_layer.visible = false
+
+func resume() -> void:
+	if not held:
+		return
+	held = false
+	ui_layer.visible = true
+	if not paused:
+		player.stream_paused = false
+
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 15
 	add_child(layer)
+	ui_layer = layer
 
 	var panel := Panel.new()
 	panel.position = Vector2(1544, 1014)

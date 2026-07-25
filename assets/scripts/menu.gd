@@ -20,6 +20,7 @@ func _process(_delta: float) -> void:
 		get_tree().change_scene_to_file("res://assets/scenes/arena.tscn")
 	
 	if play_button_hover and Input.is_action_just_pressed("attack"):
+		Music.hold()
 		animation_player.play("play")
 		await animation_player.animation_finished
 		skip_label.visible = true

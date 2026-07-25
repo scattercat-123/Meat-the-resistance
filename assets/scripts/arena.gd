@@ -40,6 +40,7 @@ var tomato_label: Label
 var player: CharacterBody2D
 
 func _ready() -> void:
+	Music.resume()
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
 	GameManager.dash_slots = 0
