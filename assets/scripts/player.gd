@@ -58,7 +58,6 @@ func _ready() -> void:
 	anim.play("Down")
 	weapon_anim.sprite_frames = _build_weapon_frames()
 	hitbox.body_entered.connect(_on_hitbox_body_entered)
-	hurtbox.body_entered.connect(_on_hurtbox_body_entered)
 	health_changed.emit(health, max_health)
 
 	damage_cooldown = Timer.new()
@@ -115,6 +114,9 @@ func _physics_process(_delta: float) -> void:
 	var b := GameManager.arena_bound
 	global_position.x = clamp(global_position.x, -b.x, b.x)
 	global_position.y = clamp(global_position.y, -b.y, b.y)
+
+	if not dashing:
+		_handle_contacts()
 
 	if dir != Vector2.ZERO and not dashing:
 		facing = dir.normalized()
@@ -208,14 +210,17 @@ func _hit_stop() -> void:
 	await get_tree().create_timer(0.045, true, false, true).timeout
 	Engine.time_scale = 1.0
 
-func _on_hurtbox_body_entered(body: Node) -> void:
-	if not damage_cooldown.is_stopped():
-		return
-	if "contact_damage" in body:
-		take_damage(body.contact_damage)
-		damage_cooldown.start()
-		if body.has_method("apply_knockback"):
+func _handle_contacts() -> void:
+	for body in hurtbox.get_overlapping_bodies():
+		if not body.has_method("apply_knockback"):
+			continue
+		if damage_cooldown.is_stopped() and "contact_damage" in body and body.contact_damage > 0:
+			take_damage(body.contact_damage)
+			damage_cooldown.start()
+		if "knockback" in body and body.knockback.length() < 50.0:
 			var dir: Vector2 = (body.global_position - global_position).normalized()
+			if dir == Vector2.ZERO:
+				dir = Vector2.RIGHT.rotated(randf() * TAU)
 			body.apply_knockback(dir, 650.0)
 
 func take_damage(amount: float) -> void:
