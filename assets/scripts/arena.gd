@@ -23,6 +23,8 @@ var spawn_timer: Timer
 var hud: CanvasLayer
 var wave_label: Label
 var hp_label: Label
+var dash_fill: ColorRect
+var dash_was_ready := true
 var player: CharacterBody2D
 
 func _ready() -> void:
@@ -74,6 +76,41 @@ func _build_hud() -> void:
 	hp_label = _make_label("", FONT_PIXEL, 44, CREAM)
 	hp_label.position = Vector2(32, 78)
 	hud.add_child(hp_label)
+
+	var dash_label := _make_label("Dash", FONT_PIXEL, 28, Color(0.65, 0.65, 0.7))
+	dash_label.position = Vector2(32, 136)
+	hud.add_child(dash_label)
+
+	var bar_bg := Panel.new()
+	bar_bg.position = Vector2(130, 142)
+	bar_bg.size = Vector2(200, 22)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.12, 0.12, 0.15)
+	sb.border_color = Color(0.35, 0.35, 0.4)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(5)
+	bar_bg.add_theme_stylebox_override("panel", sb)
+	hud.add_child(bar_bg)
+
+	dash_fill = ColorRect.new()
+	dash_fill.position = Vector2(3, 3)
+	dash_fill.size = Vector2(194, 16)
+	dash_fill.color = CREAM
+	dash_fill.pivot_offset = Vector2(97, 8)
+	bar_bg.add_child(dash_fill)
+
+func _process(_delta: float) -> void:
+	if not is_instance_valid(player):
+		return
+	var p: float = player.dash_progress()
+	dash_fill.size.x = 194.0 * p
+	var ready := p >= 1.0
+	dash_fill.color = CREAM if ready else MEAT_RED
+	if ready and not dash_was_ready:
+		var tw := dash_fill.create_tween()
+		tw.tween_property(dash_fill, "scale", Vector2(1.15, 1.5), 0.08)
+		tw.tween_property(dash_fill, "scale", Vector2.ONE, 0.1)
+	dash_was_ready = ready
 
 func _make_label(txt: String, font: Font, size: int, color: Color) -> Label:
 	var l := Label.new()
