@@ -33,7 +33,8 @@ var player: CharacterBody2D
 func _ready() -> void:
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
-	GameManager.dash_slots = 2
+	GameManager.dash_slots = 0
+	GameManager.max_dash_slots = 0
 	player = $Player
 
 	spawn_timer = Timer.new()
@@ -175,6 +176,8 @@ func _start_wave() -> void:
 	wave += 1
 	wave_label.text = "Wave %d" % wave
 	enemies_to_spawn = 3 + wave * 2
+	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + (wave - 3) / 3, 3)
+	GameManager.dash_slots = GameManager.max_dash_slots
 	spawn_timer.start()
 
 func _spawn_one() -> void:
