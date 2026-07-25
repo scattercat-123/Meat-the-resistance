@@ -56,6 +56,8 @@ func _physics_process(delta: float) -> void:
 	elif target and follow:
 		velocity = (target.global_position - global_position).normalized() * speed
 		movement()
+	else:
+		velocity = Vector2.ZERO
 	move_and_slide()
 
 	var b := GameManager.arena_bound
