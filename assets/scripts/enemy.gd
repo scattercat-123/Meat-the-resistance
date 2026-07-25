@@ -17,10 +17,12 @@ var follow = true
 var angle
 var angle_deg
 var base_color: Color
+var base_speed := 0.0
 
 func _ready() -> void:
 	randomize()
 	health = max_health
+	base_speed = speed
 	target = get_tree().get_first_node_in_group("player")
 	change_state_timer.wait_time = randf_range(3, 5)
 	change_state_timer.start()
@@ -42,6 +44,15 @@ func _physics_process(delta: float) -> void:
 
 func apply_knockback(dir: Vector2, force: float) -> void:
 	knockback = dir * force
+
+func apply_slow(factor: float, duration: float) -> void:
+	speed = base_speed * factor
+	sprite.modulate = Color(0.6, 0.75, 1.0)
+	get_tree().create_timer(duration).timeout.connect(func():
+		if not dying and is_instance_valid(self):
+			speed = base_speed
+			sprite.modulate = Color.WHITE
+	)
 
 func take_damage(amount: float, from := Vector2.INF) -> void:
 	if dying:
@@ -141,6 +152,8 @@ func movement():
 		sprite.play("walk_bottom_right")
 
 func change_state():
+	if dying:
+		return
 	var rand = randi_range(1,3)
 	if rand == 1:
 		follow = true
