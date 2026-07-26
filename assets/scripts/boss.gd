@@ -54,6 +54,31 @@ func _physics_process(delta: float) -> void:
 		global_position.y = clamp(global_position.y, -b.y, b.y)
 	elif absf(global_position.x) <= b.x and absf(global_position.y) <= b.y:
 		entered = true
+		_stomp()
+
+func _stomp() -> void:
+	GameManager.on_hit_landed()
+	var p := CPUParticles2D.new()
+	p.one_shot = true
+	p.emitting = true
+	p.amount = 16
+	p.lifetime = 0.5
+	p.explosiveness = 1.0
+	p.direction = Vector2.UP
+	p.spread = 85.0
+	p.initial_velocity_min = 80.0
+	p.initial_velocity_max = 200.0
+	p.gravity = Vector2(0, 600)
+	p.scale_amount_min = 4.0
+	p.scale_amount_max = 8.0
+	p.color = Color(0.5, 0.46, 0.4)
+	p.position = global_position + Vector2(0, 70)
+	p.z_index = 40
+	get_parent().add_child(p)
+	get_tree().create_timer(0.7).timeout.connect(p.queue_free)
+	var tw := create_tween()
+	tw.tween_property(sprite, "scale", Vector2(8.2, 5.8), 0.08)
+	tw.tween_property(sprite, "scale", Vector2(7, 7), 0.18).set_trans(Tween.TRANS_BACK)
 
 func apply_knockback(dir: Vector2, force: float) -> void:
 	knockback = dir * force * 0.15
@@ -73,13 +98,31 @@ func take_damage(amount: float, _from := Vector2.INF) -> void:
 		speed *= 1.35
 		modulate = Color(1.0, 0.72, 0.72)
 		shout("NOW I'M ANGRY. AND ORGANIC.")
+		GameManager.on_player_hurt()
+		var burst := CPUParticles2D.new()
+		burst.one_shot = true
+		burst.emitting = true
+		burst.amount = 24
+		burst.lifetime = 0.6
+		burst.explosiveness = 1.0
+		burst.spread = 180.0
+		burst.initial_velocity_min = 180.0
+		burst.initial_velocity_max = 420.0
+		burst.gravity = Vector2.ZERO
+		burst.scale_amount_min = 4.0
+		burst.scale_amount_max = 8.0
+		burst.color = Color(1.0, 0.5, 0.4)
+		burst.position = global_position
+		burst.z_index = 40
+		get_parent().add_child(burst)
+		get_tree().create_timer(0.8).timeout.connect(burst.queue_free)
 	if health <= 0.0:
 		die()
 
 func _attack_loop() -> void:
-	await get_tree().create_timer(2.8).timeout
+	await get_tree().create_timer(2.8, false).timeout
 	while not dying:
-		await get_tree().create_timer(randf_range(2.0, 3.2) * (0.65 if enraged else 1.0)).timeout
+		await get_tree().create_timer(randf_range(2.0, 3.2) * (0.65 if enraged else 1.0), false).timeout
 		if dying or target == null:
 			return
 		if not entered:
@@ -110,7 +153,7 @@ func _charge() -> void:
 	tw.set_loops()
 	tw.tween_property(r, "color:a", 0.08, 0.11)
 	tw.tween_property(r, "color:a", 0.4, 0.11)
-	await get_tree().create_timer(0.9).timeout
+	await get_tree().create_timer(0.9, false).timeout
 	tel.queue_free()
 	if dying:
 		return
@@ -118,9 +161,25 @@ func _charge() -> void:
 	charging = true
 	charge_dir = dir
 	GameManager.play("dash", -2.0)
-	await get_tree().create_timer(0.5).timeout
+	_ghost_trail()
+	await get_tree().create_timer(0.5, false).timeout
 	charging = false
 	contact_damage = 22.0
+	GameManager.on_hit_landed()
+
+func _ghost_trail() -> void:
+	while charging and not dying:
+		var g := Sprite2D.new()
+		g.texture = sprite.texture
+		g.global_position = global_position
+		g.scale = sprite.global_scale
+		g.modulate = Color(1, 1, 1, 0.4)
+		g.z_index = z_index - 1
+		get_parent().add_child(g)
+		var tw := g.create_tween()
+		tw.tween_property(g, "modulate:a", 0.0, 0.3)
+		tw.tween_callback(g.queue_free)
+		await get_tree().create_timer(0.05, false).timeout
 
 func _barrage() -> void:
 	shout(SHOUT_LINES.pick_random())
@@ -128,7 +187,7 @@ func _barrage() -> void:
 	for i in 2:
 		tw.tween_property(sprite, "modulate", Color(1.6, 1.6, 1.6), 0.15)
 		tw.tween_property(sprite, "modulate", Color.WHITE, 0.15)
-	await get_tree().create_timer(0.65).timeout
+	await get_tree().create_timer(0.65, false).timeout
 	if dying:
 		return
 	GameManager.play("swing", -6.0)
@@ -141,7 +200,7 @@ func _barrage() -> void:
 		land.x = clampf(land.x, -b.x, b.x)
 		land.y = clampf(land.y, -b.y, b.y)
 		_lob_chunk(land)
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(1.0, false).timeout
 
 func _lob_chunk(land: Vector2) -> void:
 	var tgt: Node2D = target
@@ -192,6 +251,7 @@ func _lob_chunk(land: Vector2) -> void:
 		p.z_index = 40
 		chunk.get_parent().add_child(p)
 		chunk.get_tree().create_timer(0.5).timeout.connect(p.queue_free)
+		GameManager.on_hit_landed()
 		if is_instance_valid(tgt) and tgt.global_position.distance_to(land) < 70.0:
 			tgt.take_damage(12.0)
 		chunk.queue_free()
@@ -199,7 +259,7 @@ func _lob_chunk(land: Vector2) -> void:
 
 func _summon() -> void:
 	shout("RALLY, BROTHERS!")
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.5, false).timeout
 	if dying:
 		return
 	var count := 4 if enraged else 3
@@ -218,7 +278,7 @@ func _summon() -> void:
 			_: e.global_position = Vector2(b.x, randf_range(-b.y, b.y))
 		get_parent().add_child.call_deferred(e)
 		GameManager.enemies_alive += 1
-	await get_tree().create_timer(0.4).timeout
+	await get_tree().create_timer(0.4, false).timeout
 
 func shout(txt: String) -> void:
 	if dying:
@@ -272,7 +332,7 @@ func _build_hp_bar() -> void:
 	add_child(hp_layer)
 
 	var name_l := Label.new()
-	name_l.text = "IL TOFU SUPREMO"
+	name_l.text = "THE SUPREME TOFU"
 	name_l.add_theme_font_override("font", FONT_TITLE)
 	name_l.add_theme_font_size_override("font_size", 46)
 	name_l.add_theme_color_override("font_color", Color(0.95, 0.92, 0.85))

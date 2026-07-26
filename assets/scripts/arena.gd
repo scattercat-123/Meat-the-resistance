@@ -315,7 +315,7 @@ func _spawn_boss() -> void:
 	add_child(boss)
 	GameManager.enemies_alive += 1
 
-	var ann := _make_label("IL TOFU SUPREMO", FONT_TITLE, 120, Color(0.95, 0.92, 0.85))
+	var ann := _make_label("THE SUPREME TOFU", FONT_TITLE, 120, Color(0.95, 0.92, 0.85))
 	ann.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	ann.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ann.offset_top = 380

@@ -108,7 +108,7 @@ func _try_lob() -> void:
 	for i in 2:
 		tw.tween_property(sprite, "modulate", Color(0.6, 0.3, 1.0), 0.16)
 		tw.tween_property(sprite, "modulate", Color.WHITE, 0.16)
-	await get_tree().create_timer(0.65).timeout
+	await get_tree().create_timer(0.65, false).timeout
 	casting = false
 	if dying or target == null:
 		if lob_pending:
@@ -442,7 +442,7 @@ func _try_dash() -> void:
 	dash_state = "telegraph"
 	dash_dir = (target.global_position - global_position).normalized()
 	_show_telegraph()
-	await get_tree().create_timer(TELEGRAPH_TIME).timeout
+	await get_tree().create_timer(TELEGRAPH_TIME, false).timeout
 	if dying or dash_state != "telegraph":
 		return
 	dash_state = "dashing"
@@ -450,7 +450,7 @@ func _try_dash() -> void:
 	var tw := create_tween()
 	tw.tween_property(sprite, "scale", Vector2(1.3, 0.75), 0.06)
 	_ghost_trail()
-	await get_tree().create_timer(DASH_TIME).timeout
+	await get_tree().create_timer(DASH_TIME, false).timeout
 	_end_dash()
 
 func _ghost_trail() -> void:
@@ -465,7 +465,7 @@ func _ghost_trail() -> void:
 		var gt := g.create_tween()
 		gt.tween_property(g, "modulate:a", 0.0, 0.3)
 		gt.tween_callback(g.queue_free)
-		await get_tree().create_timer(0.04).timeout
+		await get_tree().create_timer(0.04, false).timeout
 
 func _show_telegraph() -> void:
 	telegraph = Node2D.new()
