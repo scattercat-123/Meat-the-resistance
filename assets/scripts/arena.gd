@@ -58,6 +58,7 @@ var dash_was_ready := true
 var tomato_label: Label
 var meat_label: Label
 var shout_timer: Timer
+var pause_panel: Panel
 var player: CharacterBody2D
 
 func _ready() -> void:
@@ -90,6 +91,7 @@ func _ready() -> void:
 	GameManager.enemy_died.connect(_check_wave_clear)
 	GameManager.hit_landed.connect(_shake_camera.bind(14.0))
 	GameManager.player_hurt.connect(_on_player_hurt)
+	GameManager.pause_pressed.connect(_toggle_pause)
 
 	_start_wave()
 
@@ -271,6 +273,47 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", hover)
 	return btn
+
+func _toggle_pause() -> void:
+	if is_instance_valid(pause_panel):
+		pause_panel.queue_free()
+		pause_panel = null
+		get_tree().paused = false
+		return
+	if get_tree().paused:
+		return
+	get_tree().paused = true
+	pause_panel = _make_panel(Vector2(760, 600))
+
+	var title := _make_label("PAUSED", FONT_TITLE, 100, CREAM)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 20
+	pause_panel.add_child(title)
+
+	var controls := [
+		"WASD - move",
+		"Mouse 1 - steak",
+		"Mouse 2 - throw tomato",
+		"Space - dash",
+		"M / N - music",
+	]
+	for i in controls.size():
+		var c := _make_label(controls[i], FONT_PIXEL, 28, Color(0.72, 0.72, 0.78))
+		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		c.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		c.offset_top = 180 + i * 44
+		pause_panel.add_child(c)
+
+	var resume := _make_button("Resume", Vector2(360, 75))
+	resume.position = Vector2((pause_panel.size.x - 360) / 2.0, 420)
+	resume.pressed.connect(_toggle_pause)
+	pause_panel.add_child(resume)
+
+	var menu_btn := _make_button("Back to menu", Vector2(360, 65))
+	menu_btn.position = Vector2((pause_panel.size.x - 360) / 2.0, 512)
+	menu_btn.pressed.connect(func(): Transition.swipe_to("res://assets/scenes/intro.tscn"))
+	pause_panel.add_child(menu_btn)
 
 func _random_shout() -> void:
 	shout_timer.wait_time = randf_range(3.5, 6.5)

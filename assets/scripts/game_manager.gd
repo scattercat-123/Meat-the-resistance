@@ -3,6 +3,7 @@ extends Node
 signal enemy_died
 signal hit_landed
 signal player_hurt
+signal pause_pressed
 
 const SFX := {
 	"swing": preload("res://assets/audio/swing.wav"),
@@ -47,7 +48,13 @@ func release_lob_slot() -> void:
 
 var _voices: Array[AudioStreamPlayer] = []
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_ESCAPE or event.physical_keycode == KEY_P:
+			pause_pressed.emit()
+
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	for i in 8:
 		var p := AudioStreamPlayer.new()
 		p.process_mode = Node.PROCESS_MODE_ALWAYS
