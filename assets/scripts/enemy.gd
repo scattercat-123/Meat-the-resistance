@@ -225,6 +225,9 @@ func carry_sign() -> void:
 func _physics_process(delta: float) -> void:
 	angle = velocity.angle()
 	angle_deg = rad_to_deg(angle)
+	if not follow and not dying and GameManager.enemies_alive <= 3:
+		follow = true
+		contact_damage = 10 + damage_bonus
 	if knockback.length() > 10.0:
 		velocity = knockback
 		knockback = knockback.move_toward(Vector2.ZERO, 700.0 * delta)
@@ -365,16 +368,12 @@ func movement():
 func change_state():
 	if dying:
 		return
-	var rand = randi_range(1,3)
-	if rand == 1:
-		follow = true
-		contact_damage = 10 + damage_bonus
-	elif rand == 2:
+	if randf() < 0.25 and GameManager.enemies_alive > 3:
 		follow = false
 		velocity = Vector2.ZERO
 		idle(last_animation_state)
 		contact_damage = 15 + damage_bonus
-	elif rand == 3:
+	else:
 		follow = true
 		contact_damage = 10 + damage_bonus
 
