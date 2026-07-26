@@ -61,6 +61,7 @@ var player: CharacterBody2D
 
 func _ready() -> void:
 	Music.resume()
+	_build_floor()
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
 	GameManager.meat_eaten = 0
@@ -90,6 +91,31 @@ func _ready() -> void:
 	GameManager.player_hurt.connect(_on_player_hurt)
 
 	_start_wave()
+
+func _build_floor() -> void:
+	if has_node("Background"):
+		$Background.visible = false
+	var floor_sprite := Sprite2D.new()
+	floor_sprite.texture = preload("res://assets/images/grill_floor.png")
+	floor_sprite.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	floor_sprite.region_enabled = true
+	floor_sprite.region_rect = Rect2(0, 0, 480, 270)
+	floor_sprite.scale = Vector2(4, 4)
+	floor_sprite.z_index = -10
+	add_child(floor_sprite)
+
+	var ember := Sprite2D.new()
+	ember.texture = preload("res://assets/images/grill_ember.png")
+	ember.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	ember.region_enabled = true
+	ember.region_rect = Rect2(0, 0, 480, 270)
+	ember.scale = Vector2(4, 4)
+	ember.z_index = -9
+	add_child(ember)
+	var tw := ember.create_tween()
+	tw.set_loops()
+	tw.tween_property(ember, "modulate:a", 0.3, 1.7).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(ember, "modulate:a", 1.0, 1.7).set_trans(Tween.TRANS_SINE)
 
 func _shake_camera(base: float) -> void:
 	var cam := $Camera2D

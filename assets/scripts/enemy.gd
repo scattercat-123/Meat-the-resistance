@@ -354,7 +354,7 @@ func die() -> void:
 	if lob_pending:
 		lob_pending = false
 		GameManager.release_lob_slot()
-	if randf() < 0.3:
+	if randf() < 0.35:
 		var m := MEAT_SCENE.instantiate()
 		m.position = global_position
 		get_parent().add_child.call_deferred(m)

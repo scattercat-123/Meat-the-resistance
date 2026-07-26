@@ -9,7 +9,7 @@ func _ready() -> void:
 	tw.tween_property(self, "position:y", position.y, 0.7).set_trans(Tween.TRANS_SINE)
 	body_entered.connect(_on_body_entered)
 
-	var rot := get_tree().create_timer(10.0, false)
+	var rot := get_tree().create_timer(14.0, false)
 	rot.timeout.connect(func():
 		if not is_instance_valid(self) or taken:
 			return
@@ -24,7 +24,7 @@ func _on_body_entered(body: Node) -> void:
 	if taken or not body.is_in_group("player"):
 		return
 	taken = true
-	body.eat_meat(8.0)
+	body.eat_meat(10.0)
 	set_deferred("monitoring", false)
 	var tw := create_tween()
 	tw.tween_property(self, "scale", Vector2(1.5, 1.5), 0.1)
