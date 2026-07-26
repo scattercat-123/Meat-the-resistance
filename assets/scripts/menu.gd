@@ -85,7 +85,7 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.text = txt
 	btn.custom_minimum_size = size
 	btn.add_theme_font_override("font", FONT_PIXEL)
-	btn.add_theme_font_size_override("font_size", 34)
+	btn.add_theme_font_size_override("font_size", 28)
 	btn.add_theme_color_override("font_color", Color.WHITE)
 	btn.add_theme_color_override("font_hover_color", CREAM)
 	var normal := StyleBoxFlat.new()
@@ -118,7 +118,7 @@ func _open_credits() -> void:
 	title.offset_top = 20
 	panel.add_child(title)
 	for i in CREDITS.size():
-		var c := _make_label(CREDITS[i], FONT_PIXEL, 32, Color(0.85, 0.85, 0.9))
+		var c := _make_label(CREDITS[i], FONT_PIXEL, 28, Color(0.85, 0.85, 0.9))
 		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		c.set_anchors_preset(Control.PRESET_TOP_WIDE)
 		c.offset_top = 200 + i * 62

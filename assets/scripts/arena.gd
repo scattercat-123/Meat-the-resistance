@@ -147,8 +147,8 @@ func _build_hud() -> void:
 	wave_label.position = Vector2(32, 24)
 	hud.add_child(wave_label)
 
-	score_label = _make_label("Grilled: 0", FONT_PIXEL, 44, CREAM)
-	score_label.position = Vector2(1520, 24)
+	score_label = _make_label("Grilled: 0", FONT_PIXEL, 38, CREAM)
+	score_label.position = Vector2(1500, 28)
 	hud.add_child(score_label)
 
 	var hp_title := _make_label("HP", FONT_PIXEL, 28, Color(0.65, 0.65, 0.7))
@@ -256,7 +256,7 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.text = txt
 	btn.custom_minimum_size = size
 	btn.add_theme_font_override("font", FONT_PIXEL)
-	btn.add_theme_font_size_override("font_size", 40)
+	btn.add_theme_font_size_override("font_size", 32)
 	btn.add_theme_color_override("font_color", Color.WHITE)
 	btn.add_theme_color_override("font_hover_color", CREAM)
 
@@ -299,7 +299,7 @@ func _toggle_pause() -> void:
 		"M / N - music",
 	]
 	for i in controls.size():
-		var c := _make_label(controls[i], FONT_PIXEL, 28, Color(0.72, 0.72, 0.78))
+		var c := _make_label(controls[i], FONT_PIXEL, 24, Color(0.72, 0.72, 0.78))
 		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		c.set_anchors_preset(Control.PRESET_TOP_WIDE)
 		c.offset_top = 180 + i * 44
@@ -455,14 +455,14 @@ func _end_screen(win: bool) -> void:
 	panel.add_child(title)
 
 	var quip_text: String = LINES_WIN.pick_random() if win else LINES_LOSE.pick_random()
-	var quip := _make_label(quip_text, FONT_PIXEL, 32, Color(0.78, 0.78, 0.84))
+	var quip := _make_label(quip_text, FONT_PIXEL, 24, Color(0.78, 0.78, 0.84))
 	quip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	quip.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	quip.offset_top = 205
 	panel.add_child(quip)
 
 	var survived := wave if win else wave - 1
-	var stats := _make_label("Protests: %d    Grilled: %d    Eaten: %d" % [survived, GameManager.score, GameManager.meat_eaten], FONT_PIXEL, 36, CREAM)
+	var stats := _make_label("Protests: %d    Grilled: %d    Eaten: %d" % [survived, GameManager.score, GameManager.meat_eaten], FONT_PIXEL, 30, CREAM)
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	stats.offset_top = 275
