@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://v6vw3n10eeh4"
-path="res://.godot/imported/splat.wav-537c936ee295772a15eac8e748c1ad9a.sample"
+path="res://.godot/imported/splat.wav-da61577d74fee47c338c164db9bf2b11.sample"
 
 [deps]
 
-source_file="res://Assets/audio/splat.wav"
-dest_files=["res://.godot/imported/splat.wav-537c936ee295772a15eac8e748c1ad9a.sample"]
+source_file="res://assets/audio/splat.wav"
+dest_files=["res://.godot/imported/splat.wav-da61577d74fee47c338c164db9bf2b11.sample"]
 
 [params]
 

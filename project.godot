@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 
 
+
 GameManager="*res://assets/scripts/game_manager.gd"
 Music="*res://assets/scenes/music.tscn"
 Transition="*res://assets/scripts/transition.gd"
