@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
 
 @onready var change_state_timer: Timer = $change_state_timer
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -202,8 +202,8 @@ func carry_sign() -> void:
 
 	var txt: String = SIGN_TEXTS.pick_random()
 	var board := ColorRect.new()
-	var w := maxf(26.0, txt.length() * 4.2)
-	board.size = Vector2(w, 9.0)
+	var w := maxf(26.0, txt.length() * 6.4)
+	board.size = Vector2(w, 11.0)
 	board.position = Vector2(-w / 2.0, -25.0)
 	board.color = Color(0.92, 0.88, 0.8)
 	holder.add_child(board)
@@ -211,7 +211,7 @@ func carry_sign() -> void:
 	var l := Label.new()
 	l.text = txt
 	l.add_theme_font_override("font", FONT_PIXEL)
-	l.add_theme_font_size_override("font_size", 6)
+	l.add_theme_font_size_override("font_size", 8)
 	l.add_theme_color_override("font_color", Color(0.15, 0.35, 0.15))
 	l.set_anchors_preset(Control.PRESET_FULL_RECT)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -326,16 +326,16 @@ func shout(txt: String) -> void:
 		bubble.queue_free()
 	bubble = Node2D.new()
 	bubble.z_index = 30
-	var w := maxf(24.0, txt.length() * 4.4)
+	var w := maxf(24.0, txt.length() * 6.4)
 	var board := ColorRect.new()
-	board.size = Vector2(w, 10.0)
+	board.size = Vector2(w, 11.0)
 	board.position = Vector2(-w / 2.0, -42.0)
 	board.color = Color(0.95, 0.93, 0.88)
 	bubble.add_child(board)
 	var l := Label.new()
 	l.text = txt
 	l.add_theme_font_override("font", FONT_PIXEL)
-	l.add_theme_font_size_override("font_size", 7)
+	l.add_theme_font_size_override("font_size", 8)
 	l.add_theme_color_override("font_color", Color(0.55, 0.12, 0.12))
 	l.set_anchors_preset(Control.PRESET_FULL_RECT)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

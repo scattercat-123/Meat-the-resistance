@@ -1,7 +1,7 @@
 extends Node2D
 
 const ENEMY_SCENE := preload("res://assets/scenes/enemy.tscn")
-const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
 const FONT_TITLE := preload("res://assets/fonts/Singsong.otf")
 
 const MEAT_RED := Color(0.73, 0.22, 0.18)

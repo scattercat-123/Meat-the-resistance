@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
 const FONT_TITLE := preload("res://assets/fonts/Singsong.otf")
 const TOFU_CHUNK := preload("res://assets/images/weapon/tofu_chunk.png")
 const ENEMY_SCENE := preload("res://assets/scenes/enemy.tscn")
@@ -287,7 +287,7 @@ func shout(txt: String) -> void:
 		bubble.queue_free()
 	bubble = Node2D.new()
 	bubble.z_index = 30
-	var w := maxf(120.0, txt.length() * 17.0)
+	var w := maxf(120.0, txt.length() * 19.0)
 	var board := ColorRect.new()
 	board.size = Vector2(w, 38.0)
 	board.position = Vector2(-w / 2.0, -160.0)
@@ -296,7 +296,7 @@ func shout(txt: String) -> void:
 	var l := Label.new()
 	l.text = txt
 	l.add_theme_font_override("font", FONT_PIXEL)
-	l.add_theme_font_size_override("font_size", 26)
+	l.add_theme_font_size_override("font_size", 24)
 	l.add_theme_color_override("font_color", Color(0.55, 0.12, 0.12))
 	l.set_anchors_preset(Control.PRESET_FULL_RECT)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

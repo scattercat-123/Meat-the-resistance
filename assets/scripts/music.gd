@@ -1,6 +1,6 @@
 extends Node
 
-const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
 const ICON_PLAY := preload("res://assets/images/noun-play-2009520.png")
 const ICON_PAUSE := preload("res://assets/images/noun-pause-2009522.png")
 const ICON_NEXT := preload("res://assets/images/noun-fast-forward-2009519.png")

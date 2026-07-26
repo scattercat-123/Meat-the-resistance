@@ -1,0 +1,25 @@
+[remap]
+
+importer="font_data_image"
+type="FontFile"
+uid="uid://pc7ga8t0es14"
+path="res://.godot/imported/meatfont.png-7d9375de40fb09204d0e6ae07a22cac5.fontdata"
+
+[deps]
+
+source_file="res://assets/fonts/meatfont.png"
+dest_files=["res://.godot/imported/meatfont.png-7d9375de40fb09204d0e6ae07a22cac5.fontdata"]
+
+[params]
+
+character_ranges=PackedStringArray("0x0020-0x007E")
+kerning_pairs=PackedStringArray()
+columns=16
+rows=6
+image_margin=Rect2i(0, 0, 0, 0)
+character_margin=Rect2i(0, 0, 0, 0)
+ascent=0
+descent=0
+fallbacks=[]
+compress=true
+scaling_mode=2

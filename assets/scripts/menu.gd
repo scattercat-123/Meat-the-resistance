@@ -4,7 +4,7 @@ extends Node2D
 @onready var cutscene: VideoStreamPlayer = $"../cutscene"
 @onready var skip_label: Label = $"../skip_label"
 
-const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
 const FONT_TITLE := preload("res://assets/fonts/Singsong.otf")
 const CREAM := Color(0.91, 0.78, 0.66)
 const CREDITS := [
