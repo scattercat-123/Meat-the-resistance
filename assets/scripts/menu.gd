@@ -10,7 +10,7 @@ const CREAM := Color(0.91, 0.78, 0.66)
 const CREDITS := [
 	"Sajid Hossain - dev / designer",
 	"Atharv Sharma - dev / designer",
-	"Eddie Fangshou - animator",
+	"Eddie Fangzhou - animator",
 ]
 
 var play_button_hover = false
