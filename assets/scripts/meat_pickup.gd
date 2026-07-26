@@ -1,8 +1,13 @@
 extends Area2D
 
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
+
 var taken := false
 
 func _ready() -> void:
+	if not GameManager.eat_hint_shown:
+		GameManager.eat_hint_shown = true
+		_show_hint("EAT!")
 	var tw := create_tween()
 	tw.set_loops()
 	tw.tween_property(self, "position:y", position.y - 6.0, 0.7).set_trans(Tween.TRANS_SINE)
@@ -19,6 +24,20 @@ func _ready() -> void:
 		blink.tween_property(self, "modulate:a", 1.0, 0.2)
 		blink.finished.connect(queue_free)
 	)
+
+func _show_hint(txt: String) -> void:
+	var l := Label.new()
+	l.text = txt
+	l.add_theme_font_override("font", FONT_PIXEL)
+	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_color_override("font_color", Color(0.95, 0.8, 0.35))
+	l.position = Vector2(-txt.length() * 8.5, -78)
+	l.z_index = 45
+	add_child(l)
+	var tw := l.create_tween()
+	tw.set_loops()
+	tw.tween_property(l, "modulate:a", 0.35, 0.35)
+	tw.tween_property(l, "modulate:a", 1.0, 0.35)
 
 func _on_body_entered(body: Node) -> void:
 	if taken or not body.is_in_group("player"):

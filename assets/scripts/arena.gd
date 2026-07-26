@@ -67,6 +67,8 @@ func _ready() -> void:
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
 	GameManager.meat_eaten = 0
+	GameManager.eat_hint_shown = false
+	GameManager.tomato_hint_shown = false
 	GameManager.dash_slots = 0
 	GameManager.max_dash_slots = 0
 	GameManager.lob_slots = 0
@@ -274,6 +276,26 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.add_theme_stylebox_override("pressed", hover)
 	return btn
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_B and event.shift_pressed:
+			_skip_to_boss()
+
+func _skip_to_boss() -> void:
+	if wave >= FINAL_WAVE or get_tree().paused:
+		return
+	spawn_timer.stop()
+	enemies_to_spawn = 0
+	for n in get_children():
+		if n.has_method("apply_slow") and not n.dying:
+			n.dying = true
+			n.queue_free()
+	GameManager.enemies_alive = 0
+	player.apply_upgrade("Bigger steak")
+	player.apply_upgrade("Thick hide")
+	wave = FINAL_WAVE - 1
+	_start_wave()
+
 func _toggle_pause() -> void:
 	if is_instance_valid(pause_panel):
 		pause_panel.queue_free()
@@ -340,6 +362,18 @@ func _start_wave() -> void:
 		_spawn_boss()
 		return
 	wave_label.text = "Protest %d" % wave
+	if wave == 1:
+		var hint := _make_label("WASD MOVE   M1 STEAK   M2 TOMATO   SPACE DASH   EAT THE FALLEN", FONT_PIXEL, 24, Color(0.78, 0.78, 0.84))
+		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		hint.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		hint.offset_top = 960
+		hint.modulate.a = 0.0
+		hud.add_child(hint)
+		var tw := hint.create_tween()
+		tw.tween_property(hint, "modulate:a", 1.0, 0.5)
+		tw.tween_interval(5.5)
+		tw.tween_property(hint, "modulate:a", 0.0, 0.7)
+		tw.tween_callback(hint.queue_free)
 	enemies_to_spawn = 3 + wave
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
@@ -467,6 +501,20 @@ func _end_screen(win: bool) -> void:
 	stats.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	stats.offset_top = 275
 	panel.add_child(stats)
+
+	var prev_best := GameManager.best_wave
+	GameManager.record_wave(survived)
+	var best_txt := "NEW BEST!" if survived > prev_best else "Best: Protest %d" % GameManager.best_wave
+	var best := _make_label(best_txt, FONT_PIXEL, 24, Color(0.95, 0.8, 0.35))
+	best.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	best.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	best.offset_top = 322
+	panel.add_child(best)
+	if survived > prev_best:
+		var bt := best.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		bt.set_loops()
+		bt.tween_property(best, "modulate:a", 0.4, 0.4)
+		bt.tween_property(best, "modulate:a", 1.0, 0.4)
 
 	var steak := Sprite2D.new()
 	steak.texture = preload("res://assets/images/weapon/steak.png")

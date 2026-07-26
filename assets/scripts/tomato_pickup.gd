@@ -1,6 +1,22 @@
 extends Area2D
 
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
+
 func _ready() -> void:
+	if not GameManager.tomato_hint_shown:
+		GameManager.tomato_hint_shown = true
+		var l := Label.new()
+		l.text = "MOUSE 2 TO THROW"
+		l.add_theme_font_override("font", FONT_PIXEL)
+		l.add_theme_font_size_override("font_size", 22)
+		l.add_theme_color_override("font_color", Color(0.95, 0.8, 0.35))
+		l.position = Vector2(-136, -84)
+		l.z_index = 45
+		add_child(l)
+		var lt := l.create_tween()
+		lt.set_loops()
+		lt.tween_property(l, "modulate:a", 0.35, 0.35)
+		lt.tween_property(l, "modulate:a", 1.0, 0.35)
 	var tw := create_tween()
 	tw.set_loops()
 	tw.tween_property(self, "position:y", position.y - 8.0, 0.6).set_trans(Tween.TRANS_SINE)

@@ -21,6 +21,9 @@ const SFX := {
 var sfx_volume := 1.0
 var score := 0
 var meat_eaten := 0
+var best_wave := 0
+var eat_hint_shown := false
+var tomato_hint_shown := false
 var enemies_alive := 0
 var arena_bound := Vector2(960, 540)
 var dash_slots := 0
@@ -54,8 +57,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.physical_keycode == KEY_ESCAPE or event.physical_keycode == KEY_P:
 			pause_pressed.emit()
 
+func record_wave(w: int) -> void:
+	if w > best_wave:
+		best_wave = w
+		var cf := ConfigFile.new()
+		cf.set_value("stats", "best_wave", best_wave)
+		cf.save("user://meat_save.cfg")
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var cf := ConfigFile.new()
+	if cf.load("user://meat_save.cfg") == OK:
+		best_wave = cf.get_value("stats", "best_wave", 0)
 	for i in 8:
 		var p := AudioStreamPlayer.new()
 		p.process_mode = Node.PROCESS_MODE_ALWAYS
