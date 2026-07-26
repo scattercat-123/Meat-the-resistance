@@ -376,7 +376,7 @@ func change_state():
 		contact_damage = 15 + damage_bonus
 	elif rand == 3:
 		follow = true
-		contact_damage = 0
+		contact_damage = 10 + damage_bonus
 
 func apply_slow(factor: float, duration: float) -> void:
 	speed = base_speed * factor
