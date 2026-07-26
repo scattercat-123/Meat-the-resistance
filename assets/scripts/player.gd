@@ -288,6 +288,24 @@ func heal(amount: float) -> void:
 	health = minf(health + amount, max_health)
 	health_changed.emit(health, max_health)
 
+func eat_meat(amount: float) -> void:
+	heal(amount)
+	GameManager.meat_eaten += 1
+	GameManager.play("chomp")
+	if randf() < 0.01:
+		GameManager.play("burp", 2.0)
+	if randf() < 0.25:
+		var best: Node2D
+		var best_d := 700.0
+		for n in get_parent().get_children():
+			if n.has_method("shout") and not n.dying:
+				var d := global_position.distance_to(n.global_position)
+				if d < best_d:
+					best_d = d
+					best = n
+		if best:
+			best.shout("HE'S EATING KEVIN!!")
+
 func take_damage(amount: float) -> void:
 	health = max(health - amount, 0.0)
 	health_changed.emit(health, max_health)

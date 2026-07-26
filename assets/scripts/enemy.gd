@@ -15,6 +15,7 @@ const TELEGRAPH_TIME := 0.65
 
 const SIGN_TEXTS := ["GO VEGAN", "MEAT IS MURDER", "EAT KALE", "TOFU 4EVER", "SAVE THE COWS", "PLANT POWER"]
 const EGGPLANT_TEX := preload("res://assets/images/weapon/eggplant.png")
+const MEAT_SCENE := preload("res://assets/scenes/meat_pickup.tscn")
 
 var last_animation_state = ""
 var health := 0.0
@@ -35,6 +36,7 @@ var dash_state := "none"
 var dash_dir := Vector2.ZERO
 var telegraph: Node2D
 var dash_timer: Timer
+var bubble: Node2D
 
 func _ready() -> void:
 	randomize()
@@ -317,11 +319,45 @@ func _spawn_splatter() -> void:
 	get_parent().add_child(p)
 	get_tree().create_timer(0.6).timeout.connect(p.queue_free)
 
+func shout(txt: String) -> void:
+	if dying:
+		return
+	if is_instance_valid(bubble):
+		bubble.queue_free()
+	bubble = Node2D.new()
+	bubble.z_index = 30
+	var w := maxf(24.0, txt.length() * 4.4)
+	var board := ColorRect.new()
+	board.size = Vector2(w, 10.0)
+	board.position = Vector2(-w / 2.0, -42.0)
+	board.color = Color(0.95, 0.93, 0.88)
+	bubble.add_child(board)
+	var l := Label.new()
+	l.text = txt
+	l.add_theme_font_override("font", FONT_PIXEL)
+	l.add_theme_font_size_override("font_size", 7)
+	l.add_theme_color_override("font_color", Color(0.55, 0.12, 0.12))
+	l.set_anchors_preset(Control.PRESET_FULL_RECT)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	board.add_child(l)
+	add_child(bubble)
+	bubble.scale = Vector2(0.2, 0.2)
+	var tw := bubble.create_tween()
+	tw.tween_property(bubble, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(1.3)
+	tw.tween_property(bubble, "modulate:a", 0.0, 0.25)
+	tw.tween_callback(bubble.queue_free)
+
 func die() -> void:
 	dying = true
 	if lob_pending:
 		lob_pending = false
 		GameManager.release_lob_slot()
+	if randf() < 0.3:
+		var m := MEAT_SCENE.instantiate()
+		m.position = global_position
+		get_parent().add_child.call_deferred(m)
 	collision_layer = 0
 	contact_damage = 0.0
 	set_physics_process(false)

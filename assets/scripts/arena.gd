@@ -38,6 +38,7 @@ const LINES_WIN := [
 	"You grilled your way to freedom.",
 	"Word is their Supreme Tofu leader escaped...",
 ]
+const SHOUTS := ["MURDERER!", "HOW COULD YOU", "THINK OF THE CARROTS", "SHAME!", "GO VEGAN!", "MONSTER!"]
 
 var wave := 0
 var enemies_to_spawn := 0
@@ -54,12 +55,15 @@ var hp_fill: ColorRect
 var dash_fill: ColorRect
 var dash_was_ready := true
 var tomato_label: Label
+var meat_label: Label
+var shout_timer: Timer
 var player: CharacterBody2D
 
 func _ready() -> void:
 	Music.resume()
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
+	GameManager.meat_eaten = 0
 	GameManager.dash_slots = 0
 	GameManager.max_dash_slots = 0
 	GameManager.lob_slots = 0
@@ -70,6 +74,13 @@ func _ready() -> void:
 	spawn_timer.wait_time = 0.6
 	spawn_timer.timeout.connect(_spawn_one)
 	add_child(spawn_timer)
+
+	shout_timer = Timer.new()
+	shout_timer.one_shot = true
+	shout_timer.wait_time = 4.0
+	shout_timer.timeout.connect(_random_shout)
+	add_child(shout_timer)
+	shout_timer.start()
 
 	_build_hud()
 	player.health_changed.connect(_on_health_changed)
@@ -137,6 +148,16 @@ func _build_hud() -> void:
 	tomato_label.position = Vector2(84, 194)
 	hud.add_child(tomato_label)
 
+	var meat_icon := Sprite2D.new()
+	meat_icon.texture = preload("res://assets/images/weapon/meat.png")
+	meat_icon.scale = Vector2(3, 3)
+	meat_icon.position = Vector2(52, 258)
+	hud.add_child(meat_icon)
+
+	meat_label = _make_label("x0", FONT_PIXEL, 30, CREAM)
+	meat_label.position = Vector2(84, 242)
+	hud.add_child(meat_label)
+
 func _make_bar(pos: Vector2, size: Vector2) -> ColorRect:
 	var bg := Panel.new()
 	bg.position = pos
@@ -161,6 +182,7 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(player):
 		return
 	tomato_label.text = "x%d" % player.tomatoes
+	meat_label.text = "x%d" % GameManager.meat_eaten
 	var p: float = player.dash_progress()
 	dash_fill.size.x = (dash_fill.get_parent().size.x - 6.0) * p
 	var dash_ready := p >= 1.0
@@ -223,11 +245,19 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.add_theme_stylebox_override("pressed", hover)
 	return btn
 
+func _random_shout() -> void:
+	shout_timer.wait_time = randf_range(3.5, 6.5)
+	shout_timer.start()
+	var candidates := []
+	for n in get_children():
+		if n.has_method("shout") and not n.dying and n.entered:
+			candidates.append(n)
+	if not candidates.is_empty():
+		candidates.pick_random().shout(SHOUTS.pick_random())
+
 func _start_wave() -> void:
 	wave += 1
-	wave_label.text = "Wave %d" % wave
-	if wave > 1:
-		player.heal(10.0)
+	wave_label.text = "Protest %d" % wave
 	enemies_to_spawn = 3 + wave
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
@@ -331,7 +361,7 @@ func _end_screen(win: bool) -> void:
 	panel.add_child(quip)
 
 	var survived := wave if win else wave - 1
-	var stats := _make_label("Waves: %d      Grilled: %d" % [survived, GameManager.score], FONT_PIXEL, 42, CREAM)
+	var stats := _make_label("Protests: %d    Grilled: %d    Eaten: %d" % [survived, GameManager.score, GameManager.meat_eaten], FONT_PIXEL, 36, CREAM)
 	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stats.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	stats.offset_top = 275

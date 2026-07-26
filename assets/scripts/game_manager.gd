@@ -13,9 +13,12 @@ const SFX := {
 	"upgrade": preload("res://assets/audio/upgrade.wav"),
 	"game_over": preload("res://assets/audio/game_over.wav"),
 	"splat": preload("res://assets/audio/splat.wav"),
+	"chomp": preload("res://assets/audio/chomp.wav"),
+	"burp": preload("res://assets/audio/burp.wav"),
 }
 
 var score := 0
+var meat_eaten := 0
 var enemies_alive := 0
 var arena_bound := Vector2(960, 540)
 var dash_slots := 0
