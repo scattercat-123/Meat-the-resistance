@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6xny0s8e3tbo"
-path="res://.godot/imported/noun-fast-backward-2009518.png-7abbd92a0149a83aa4ff7bf4e81de623.ctex"
+uid="uid://cj2not42v8sqn"
+path="res://.godot/imported/meat.png-56c8e38080f96c3ade2a6effb9f77cf3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/noun-fast-backward-2009518.png"
-dest_files=["res://.godot/imported/noun-fast-backward-2009518.png-7abbd92a0149a83aa4ff7bf4e81de623.ctex"]
+source_file="res://assets/images/weapon/meat.png"
+dest_files=["res://.godot/imported/meat.png-56c8e38080f96c3ade2a6effb9f77cf3.ctex"]
 
 [params]
 

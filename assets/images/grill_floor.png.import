@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6xny0s8e3tbo"
-path="res://.godot/imported/noun-fast-backward-2009518.png-7abbd92a0149a83aa4ff7bf4e81de623.ctex"
+uid="uid://cmfjcnn5h2brn"
+path="res://.godot/imported/grill_floor.png-450b26a30926e52241eab18c1361beac.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/noun-fast-backward-2009518.png"
-dest_files=["res://.godot/imported/noun-fast-backward-2009518.png-7abbd92a0149a83aa4ff7bf4e81de623.ctex"]
+source_file="res://assets/images/grill_floor.png"
+dest_files=["res://.godot/imported/grill_floor.png-450b26a30926e52241eab18c1361beac.ctex"]
 
 [params]
 

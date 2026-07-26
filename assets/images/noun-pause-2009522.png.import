@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://clmgevgww4xqx"
-path="res://.godot/imported/noun-pause-2009522.png-30d5497282e4c1efa27cee810bbd0252.ctex"
+path="res://.godot/imported/noun-pause-2009522.png-53027dd469c13c3ed27ba8e79b67ebf7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/noun-pause-2009522.png"
-dest_files=["res://.godot/imported/noun-pause-2009522.png-30d5497282e4c1efa27cee810bbd0252.ctex"]
+source_file="res://assets/images/noun-pause-2009522.png"
+dest_files=["res://.godot/imported/noun-pause-2009522.png-53027dd469c13c3ed27ba8e79b67ebf7.ctex"]
 
 [params]
 

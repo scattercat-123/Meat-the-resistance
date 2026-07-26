@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dkq3tx8iy7f2b"
-path="res://.godot/imported/noun-play-2009520.png-6dcc96e8b394bc783c14648d94d733e7.ctex"
+path="res://.godot/imported/noun-play-2009520.png-e3fdf3729d43cc1972ea153b759cbcd6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/noun-play-2009520.png"
-dest_files=["res://.godot/imported/noun-play-2009520.png-6dcc96e8b394bc783c14648d94d733e7.ctex"]
+source_file="res://assets/images/noun-play-2009520.png"
+dest_files=["res://.godot/imported/noun-play-2009520.png-e3fdf3729d43cc1972ea153b759cbcd6.ctex"]
 
 [params]
 

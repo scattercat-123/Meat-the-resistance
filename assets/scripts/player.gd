@@ -53,6 +53,8 @@ var dash_dir := Vector2.DOWN
 var dash_ready_at := 0
 var facing := Vector2.DOWN
 var damage_cooldown: Timer
+var breath_tween: Tween
+var dust_cooldown := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -102,7 +104,7 @@ func _add_sheet(sf: SpriteFrames, anim_name: String, path: String, count: int, s
 		at.region = Rect2(i * size, 0, size, size)
 		sf.add_frame(anim_name, at)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	var dir := Vector2(
 		Input.get_axis("move_left", "move_right"),
 		Input.get_axis("move_up", "move_down")
@@ -129,12 +131,23 @@ func _physics_process(_delta: float) -> void:
 			steak.position.x = 34.0 * s
 			steak.rotation = 0.3 * s
 
+	if dir != Vector2.ZERO and not dashing:
+		dust_cooldown -= delta
+		if dust_cooldown <= 0.0:
+			dust_cooldown = 0.22
+			_spawn_dust()
+
 	if not attacking and not dashing:
 		if dir != Vector2.ZERO:
+			_stop_breathing()
 			anim.play(_anim_name(facing))
 		else:
 			anim.stop()
 			anim.frame = 0
+			if breath_tween == null or not breath_tween.is_valid():
+				breath_tween = create_tween().set_loops()
+				breath_tween.tween_property(anim, "scale:y", 4.12, 0.6).set_trans(Tween.TRANS_SINE)
+				breath_tween.tween_property(anim, "scale:y", 4.0, 0.6).set_trans(Tween.TRANS_SINE)
 
 	if can_dash and not dashing and Input.is_action_just_pressed("dash"):
 		dash(dir)
@@ -145,19 +158,52 @@ func _physics_process(_delta: float) -> void:
 	if tomatoes > 0 and not dashing and Input.is_action_just_pressed("throw"):
 		throw_tomato()
 
+func _stop_breathing() -> void:
+	if breath_tween and breath_tween.is_valid():
+		breath_tween.kill()
+	anim.scale.y = 4.0
+
+func _spawn_dust() -> void:
+	var d := ColorRect.new()
+	d.size = Vector2(12, 7)
+	d.position = global_position + Vector2(randf_range(-14, 6), 62)
+	d.color = Color(0.55, 0.5, 0.42, 0.45)
+	get_parent().add_child(d)
+	var tw := d.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(d, "position:y", d.position.y - 12.0, 0.35)
+	tw.tween_property(d, "color:a", 0.0, 0.35)
+	tw.chain().tween_callback(d.queue_free)
+
 func dash(dir: Vector2) -> void:
 	can_dash = false
+	_stop_breathing()
 	dashing = true
 	dash_ready_at = Time.get_ticks_msec() + int((dash_time + dash_cooldown) * 1000.0)
 	GameManager.play("dash", -6.0)
 	dash_dir = dir.normalized() if dir != Vector2.ZERO else facing
 	hurtbox.monitoring = false
 	anim.play("Roll" + _anim_name(dash_dir))
+	_ghost_trail()
 	await get_tree().create_timer(dash_time).timeout
 	dashing = false
 	hurtbox.monitoring = true
 	await get_tree().create_timer(dash_cooldown).timeout
 	can_dash = true
+
+func _ghost_trail() -> void:
+	while dashing:
+		var g := Sprite2D.new()
+		g.texture = anim.sprite_frames.get_frame_texture(anim.animation, anim.frame)
+		g.global_position = anim.global_position
+		g.scale = anim.global_scale
+		g.modulate = Color(0.91, 0.78, 0.66, 0.45)
+		g.z_index = z_index - 1
+		get_parent().add_child(g)
+		var tw := g.create_tween()
+		tw.tween_property(g, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(g.queue_free)
+		await get_tree().create_timer(0.035).timeout
 
 func dash_progress() -> float:
 	if can_dash:
@@ -184,6 +230,7 @@ func _slash_dir(d: Vector2) -> String:
 func attack() -> void:
 	can_attack = false
 	attacking = true
+	_stop_breathing()
 	GameManager.play("swing", -4.0)
 	var aim_dir := (get_global_mouse_position() - global_position).normalized()
 	aim.rotation = aim_dir.angle()
@@ -240,6 +287,24 @@ func throw_tomato() -> void:
 func heal(amount: float) -> void:
 	health = minf(health + amount, max_health)
 	health_changed.emit(health, max_health)
+
+func eat_meat(amount: float) -> void:
+	heal(amount)
+	GameManager.meat_eaten += 1
+	GameManager.play("chomp")
+	if randf() < 0.01:
+		GameManager.play("burp", 2.0)
+	if randf() < 0.25:
+		var best: Node2D
+		var best_d := 700.0
+		for n in get_parent().get_children():
+			if n.has_method("shout") and not n.dying:
+				var d := global_position.distance_to(n.global_position)
+				if d < best_d:
+					best_d = d
+					best = n
+		if best:
+			best.shout("HE'S EATING KEVIN!!")
 
 func take_damage(amount: float) -> void:
 	health = max(health - amount, 0.0)

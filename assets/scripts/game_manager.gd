@@ -3,6 +3,7 @@ extends Node
 signal enemy_died
 signal hit_landed
 signal player_hurt
+signal pause_pressed
 
 const SFX := {
 	"swing": preload("res://assets/audio/swing.wav"),
@@ -13,9 +14,16 @@ const SFX := {
 	"upgrade": preload("res://assets/audio/upgrade.wav"),
 	"game_over": preload("res://assets/audio/game_over.wav"),
 	"splat": preload("res://assets/audio/splat.wav"),
+	"chomp": preload("res://assets/audio/chomp.wav"),
+	"burp": preload("res://assets/audio/burp.wav"),
 }
 
+var sfx_volume := 1.0
 var score := 0
+var meat_eaten := 0
+var best_wave := 0
+var eat_hint_shown := false
+var tomato_hint_shown := false
 var enemies_alive := 0
 var arena_bound := Vector2(960, 540)
 var dash_slots := 0
@@ -30,9 +38,37 @@ func request_dash_slot() -> bool:
 func release_dash_slot() -> void:
 	dash_slots = min(dash_slots + 1, max_dash_slots)
 
+var lob_slots := 0
+var max_lob_slots := 0
+
+func request_lob_slot() -> bool:
+	if lob_slots > 0:
+		lob_slots -= 1
+		return true
+	return false
+
+func release_lob_slot() -> void:
+	lob_slots = min(lob_slots + 1, max_lob_slots)
+
 var _voices: Array[AudioStreamPlayer] = []
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_ESCAPE or event.physical_keycode == KEY_P:
+			pause_pressed.emit()
+
+func record_wave(w: int) -> void:
+	if w > best_wave:
+		best_wave = w
+		var cf := ConfigFile.new()
+		cf.set_value("stats", "best_wave", best_wave)
+		cf.save("user://meat_save.cfg")
+
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	var cf := ConfigFile.new()
+	if cf.load("user://meat_save.cfg") == OK:
+		best_wave = cf.get_value("stats", "best_wave", 0)
 	for i in 8:
 		var p := AudioStreamPlayer.new()
 		p.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -40,10 +76,12 @@ func _ready() -> void:
 		_voices.append(p)
 
 func play(sound: String, volume_db := 0.0) -> void:
+	if sfx_volume <= 0.01:
+		return
 	for p in _voices:
 		if not p.playing:
 			p.stream = SFX[sound]
-			p.volume_db = volume_db
+			p.volume_db = volume_db + linear_to_db(sfx_volume)
 			p.play()
 			return
 

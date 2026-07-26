@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgimlmfiiydsj"
-path="res://.godot/imported/noun-fast-forward-2009519.png-311dd59ed77d0d5331edd3e8ed1950f7.ctex"
+path="res://.godot/imported/noun-fast-forward-2009519.png-0e70d27db0f74dddcb66cc16b5b5ef8d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/images/noun-fast-forward-2009519.png"
-dest_files=["res://.godot/imported/noun-fast-forward-2009519.png-311dd59ed77d0d5331edd3e8ed1950f7.ctex"]
+source_file="res://assets/images/noun-fast-forward-2009519.png"
+dest_files=["res://.godot/imported/noun-fast-forward-2009519.png-0e70d27db0f74dddcb66cc16b5b5ef8d.ctex"]
 
 [params]
 

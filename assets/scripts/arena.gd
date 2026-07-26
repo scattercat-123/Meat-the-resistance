@@ -1,7 +1,7 @@
 extends Node2D
 
 const ENEMY_SCENE := preload("res://assets/scenes/enemy.tscn")
-const FONT_PIXEL := preload("res://assets/fonts/pixelart.ttf")
+const FONT_PIXEL := preload("res://assets/fonts/meatfont.png")
 const FONT_TITLE := preload("res://assets/fonts/Singsong.otf")
 
 const MEAT_RED := Color(0.73, 0.22, 0.18)
@@ -17,12 +17,36 @@ const UPGRADES := [
 	{"name": "Long reach", "desc": "bigger hitbox, faster swing"},
 	{"name": "Frozen steak", "desc": "freezing cuts slow vegans down"},
 	{"name": "Bone-in steak", "desc": "+50% damage, more reach, slower"},
-	{"name": "Tomato launcher", "desc": "auto-throws rotten tomatoes"},
 	{"name": "Protein shake", "desc": "+15% damage, +35 speed"},
 ]
 
+const TOMATO_PICKUP_SCENE := preload("res://assets/scenes/tomato_pickup.tscn")
+const BOSS_SCENE := preload("res://assets/scenes/boss.tscn")
+const TOMATO_WAVE := 6
+const FINAL_WAVE := 10
+
+const LINES_LOSE := [
+	"COMPOSTED.",
+	"The vegans turned you into fertilizer.",
+	"Your steak now belongs to a salad bar.",
+	"Beaten by people who don't even lift.",
+	"Death by broccoli. Embarrassing.",
+	"They are reading you tofu recipes. All of them.",
+]
+const LINES_WIN := [
+	"The resistance has been MEATED.",
+	"Vegans: 0 - Steak: everything.",
+	"You grilled your way to freedom.",
+	"Their Supreme Tofu leader is now a side dish.",
+]
+const SHOUTS := ["MURDERER!", "HOW COULD YOU", "THINK OF THE CARROTS", "SHAME!", "GO VEGAN!", "MONSTER!"]
+
 var wave := 0
 var enemies_to_spawn := 0
+var wave_size := 0
+var wave_kills := 0
+var tomatoes_dropped := 0
+var signs_this_wave := 0
 var spawn_timer: Timer
 var hud: CanvasLayer
 var wave_label: Label
@@ -31,13 +55,24 @@ var hp_label: Label
 var hp_fill: ColorRect
 var dash_fill: ColorRect
 var dash_was_ready := true
+var tomato_label: Label
+var meat_label: Label
+var shout_timer: Timer
+var pause_panel: Panel
 var player: CharacterBody2D
 
 func _ready() -> void:
+	Music.resume()
+	_build_floor()
 	GameManager.enemies_alive = 0
 	GameManager.score = 0
+	GameManager.meat_eaten = 0
+	GameManager.eat_hint_shown = false
+	GameManager.tomato_hint_shown = false
 	GameManager.dash_slots = 0
 	GameManager.max_dash_slots = 0
+	GameManager.lob_slots = 0
+	GameManager.max_lob_slots = 0
 	player = $Player
 
 	spawn_timer = Timer.new()
@@ -45,14 +80,47 @@ func _ready() -> void:
 	spawn_timer.timeout.connect(_spawn_one)
 	add_child(spawn_timer)
 
+	shout_timer = Timer.new()
+	shout_timer.one_shot = true
+	shout_timer.wait_time = 4.0
+	shout_timer.timeout.connect(_random_shout)
+	add_child(shout_timer)
+	shout_timer.start()
+
 	_build_hud()
 	player.health_changed.connect(_on_health_changed)
 	player.died.connect(_on_player_died)
 	GameManager.enemy_died.connect(_check_wave_clear)
 	GameManager.hit_landed.connect(_shake_camera.bind(14.0))
 	GameManager.player_hurt.connect(_on_player_hurt)
+	GameManager.pause_pressed.connect(_toggle_pause)
 
 	_start_wave()
+
+func _build_floor() -> void:
+	if has_node("Background"):
+		$Background.visible = false
+	var floor_sprite := Sprite2D.new()
+	floor_sprite.texture = preload("res://assets/images/grill_floor.png")
+	floor_sprite.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	floor_sprite.region_enabled = true
+	floor_sprite.region_rect = Rect2(0, 0, 480, 270)
+	floor_sprite.scale = Vector2(4, 4)
+	floor_sprite.z_index = -10
+	add_child(floor_sprite)
+
+	var ember := Sprite2D.new()
+	ember.texture = preload("res://assets/images/grill_ember.png")
+	ember.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	ember.region_enabled = true
+	ember.region_rect = Rect2(0, 0, 480, 270)
+	ember.scale = Vector2(4, 4)
+	ember.z_index = -9
+	add_child(ember)
+	var tw := ember.create_tween()
+	tw.set_loops()
+	tw.tween_property(ember, "modulate:a", 0.3, 1.7).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(ember, "modulate:a", 1.0, 1.7).set_trans(Tween.TRANS_SINE)
 
 func _shake_camera(base: float) -> void:
 	var cam := $Camera2D
@@ -81,8 +149,8 @@ func _build_hud() -> void:
 	wave_label.position = Vector2(32, 24)
 	hud.add_child(wave_label)
 
-	score_label = _make_label("Grilled: 0", FONT_PIXEL, 44, CREAM)
-	score_label.position = Vector2(1520, 24)
+	score_label = _make_label("Grilled: 0", FONT_PIXEL, 38, CREAM)
+	score_label.position = Vector2(1500, 28)
 	hud.add_child(score_label)
 
 	var hp_title := _make_label("HP", FONT_PIXEL, 28, Color(0.65, 0.65, 0.7))
@@ -100,6 +168,26 @@ func _build_hud() -> void:
 	hud.add_child(dash_label)
 
 	dash_fill = _make_bar(Vector2(130, 142), Vector2(200, 22))
+
+	var tomato_icon := Sprite2D.new()
+	tomato_icon.texture = preload("res://assets/images/weapon/tomato.png")
+	tomato_icon.scale = Vector2(3, 3)
+	tomato_icon.position = Vector2(52, 210)
+	hud.add_child(tomato_icon)
+
+	tomato_label = _make_label("x0", FONT_PIXEL, 30, CREAM)
+	tomato_label.position = Vector2(84, 194)
+	hud.add_child(tomato_label)
+
+	var meat_icon := Sprite2D.new()
+	meat_icon.texture = preload("res://assets/images/weapon/meat.png")
+	meat_icon.scale = Vector2(3, 3)
+	meat_icon.position = Vector2(52, 258)
+	hud.add_child(meat_icon)
+
+	meat_label = _make_label("x0", FONT_PIXEL, 30, CREAM)
+	meat_label.position = Vector2(84, 242)
+	hud.add_child(meat_label)
 
 func _make_bar(pos: Vector2, size: Vector2) -> ColorRect:
 	var bg := Panel.new()
@@ -124,6 +212,8 @@ func _make_bar(pos: Vector2, size: Vector2) -> ColorRect:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(player):
 		return
+	tomato_label.text = "x%d" % player.tomatoes
+	meat_label.text = "x%d" % GameManager.meat_eaten
 	var p: float = player.dash_progress()
 	dash_fill.size.x = (dash_fill.get_parent().size.x - 6.0) * p
 	var dash_ready := p >= 1.0
@@ -154,6 +244,13 @@ func _make_panel(size: Vector2) -> Panel:
 	sb.set_corner_radius_all(16)
 	panel.add_theme_stylebox_override("panel", sb)
 	hud.add_child(panel)
+	panel.pivot_offset = size / 2.0
+	panel.scale = Vector2(0.8, 0.8)
+	panel.modulate.a = 0.0
+	var tw := panel.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.set_parallel(true)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.15)
 	return panel
 
 func _make_button(txt: String, size: Vector2) -> Button:
@@ -161,7 +258,7 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.text = txt
 	btn.custom_minimum_size = size
 	btn.add_theme_font_override("font", FONT_PIXEL)
-	btn.add_theme_font_size_override("font_size", 40)
+	btn.add_theme_font_size_override("font_size", 32)
 	btn.add_theme_color_override("font_color", Color.WHITE)
 	btn.add_theme_color_override("font_hover_color", CREAM)
 
@@ -179,15 +276,133 @@ func _make_button(txt: String, size: Vector2) -> Button:
 	btn.add_theme_stylebox_override("pressed", hover)
 	return btn
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_B and event.shift_pressed:
+			_skip_to_boss()
+
+func _skip_to_boss() -> void:
+	if wave >= FINAL_WAVE or get_tree().paused:
+		return
+	spawn_timer.stop()
+	enemies_to_spawn = 0
+	for n in get_children():
+		if n.has_method("apply_slow") and not n.dying:
+			n.dying = true
+			n.queue_free()
+	GameManager.enemies_alive = 0
+	player.apply_upgrade("Bigger steak")
+	player.apply_upgrade("Thick hide")
+	wave = FINAL_WAVE - 1
+	_start_wave()
+
+func _toggle_pause() -> void:
+	if is_instance_valid(pause_panel):
+		pause_panel.queue_free()
+		pause_panel = null
+		get_tree().paused = false
+		return
+	if get_tree().paused:
+		return
+	get_tree().paused = true
+	pause_panel = _make_panel(Vector2(760, 600))
+
+	var title := _make_label("PAUSED", FONT_TITLE, 100, CREAM)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 20
+	pause_panel.add_child(title)
+
+	var controls := [
+		"WASD - move",
+		"Mouse 1 - steak",
+		"Mouse 2 - throw tomato",
+		"Space - dash",
+		"M / N - music",
+	]
+	for i in controls.size():
+		var c := _make_label(controls[i], FONT_PIXEL, 24, Color(0.72, 0.72, 0.78))
+		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		c.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		c.offset_top = 180 + i * 44
+		pause_panel.add_child(c)
+
+	var resume := _make_button("Resume", Vector2(360, 75))
+	resume.position = Vector2((pause_panel.size.x - 360) / 2.0, 420)
+	resume.pressed.connect(_toggle_pause)
+	pause_panel.add_child(resume)
+
+	var menu_btn := _make_button("Back to menu", Vector2(360, 65))
+	menu_btn.position = Vector2((pause_panel.size.x - 360) / 2.0, 512)
+	menu_btn.pressed.connect(func(): Transition.swipe_to("res://assets/scenes/intro.tscn"))
+	pause_panel.add_child(menu_btn)
+
+func _random_shout() -> void:
+	shout_timer.wait_time = randf_range(3.5, 6.5)
+	shout_timer.start()
+	var candidates := []
+	for n in get_children():
+		if n.has_method("shout") and not n.dying and n.entered:
+			candidates.append(n)
+	if not candidates.is_empty():
+		candidates.pick_random().shout(SHOUTS.pick_random())
+
 func _start_wave() -> void:
 	wave += 1
-	wave_label.text = "Wave %d" % wave
-	if wave > 1:
-		player.heal(10.0)
-	enemies_to_spawn = 3 + wave * 2
+	if wave == FINAL_WAVE:
+		wave_label.text = "FINAL PROTEST"
+		wave_size = 12
+		wave_kills = 0
+		tomatoes_dropped = 0
+		signs_this_wave = 2
+		GameManager.max_dash_slots = 2
+		GameManager.dash_slots = 2
+		GameManager.max_lob_slots = 2
+		GameManager.lob_slots = 2
+		_spawn_boss()
+		return
+	wave_label.text = "Protest %d" % wave
+	if wave == 1:
+		var hint := _make_label("WASD MOVE   M1 STEAK   M2 TOMATO   SPACE DASH   EAT THE FALLEN", FONT_PIXEL, 24, Color(0.78, 0.78, 0.84))
+		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		hint.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		hint.offset_top = 960
+		hint.modulate.a = 0.0
+		hud.add_child(hint)
+		var tw := hint.create_tween()
+		tw.tween_property(hint, "modulate:a", 1.0, 0.5)
+		tw.tween_interval(5.5)
+		tw.tween_property(hint, "modulate:a", 0.0, 0.7)
+		tw.tween_callback(hint.queue_free)
+	enemies_to_spawn = 3 + wave
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
 	GameManager.dash_slots = GameManager.max_dash_slots
+	GameManager.max_lob_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
+	GameManager.lob_slots = GameManager.max_lob_slots
+	wave_size = enemies_to_spawn
+	wave_kills = 0
+	tomatoes_dropped = 0
+	signs_this_wave = 0
 	spawn_timer.start()
+
+func _spawn_boss() -> void:
+	Music.force_track("Heavy Doom")
+	var boss := BOSS_SCENE.instantiate()
+	boss.global_position = Vector2(0, -720)
+	add_child(boss)
+	GameManager.enemies_alive += 1
+
+	var ann := _make_label("THE SUPREME TOFU", FONT_TITLE, 120, Color(0.95, 0.92, 0.85))
+	ann.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	ann.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ann.offset_top = 380
+	ann.modulate.a = 0.0
+	hud.add_child(ann)
+	var tw := ann.create_tween()
+	tw.tween_property(ann, "modulate:a", 1.0, 0.5)
+	tw.tween_interval(1.6)
+	tw.tween_property(ann, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(ann.queue_free)
 
 func _spawn_one() -> void:
 	if enemies_to_spawn <= 0:
@@ -199,12 +414,26 @@ func _spawn_one() -> void:
 	enemy.speed += minf(wave * 4.0, 100.0)
 	enemy.max_health += wave * 7.0 + wave * wave
 	enemy.damage_bonus = wave
+	var roll := randf()
+	var lob_chance := minf(0.10 + wave * 0.012, 0.20)
+	if wave >= 7 and roll < 0.15:
+		enemy.make_variant("tank")
+	elif wave >= 5 and roll < 0.27:
+		enemy.make_variant("healer")
+	elif wave >= 3 and roll < 0.27 + lob_chance:
+		enemy.make_variant("lobber")
+	elif wave >= 4 and roll < 0.52 + lob_chance:
+		enemy.make_variant("runner")
+	var first_of_wave := enemies_to_spawn == wave_size - 1
+	if first_of_wave or (signs_this_wave < 2 and randf() < 0.12):
+		enemy.carry_sign()
+		signs_this_wave += 1
 	enemy.global_position = _edge_spawn_point()
 	add_child(enemy)
 	GameManager.enemies_alive += 1
 
 func _edge_spawn_point() -> Vector2:
-	var b := GameManager.arena_bound
+	var b := GameManager.arena_bound + Vector2(120, 120)
 	match randi() % 4:
 		0: return Vector2(randf_range(-b.x, b.x), -b.y)
 		1: return Vector2(randf_range(-b.x, b.x), b.y)
@@ -213,8 +442,22 @@ func _edge_spawn_point() -> Vector2:
 
 func _check_wave_clear() -> void:
 	score_label.text = "Grilled: %d" % GameManager.score
+	wave_kills += 1
+	if wave >= TOMATO_WAVE:
+		while tomatoes_dropped < 3 and wave_kills >= ceili(wave_size * 0.3 * (tomatoes_dropped + 1)):
+			_drop_tomato()
 	if GameManager.enemies_alive <= 0 and enemies_to_spawn <= 0:
-		_offer_upgrade()
+		if wave >= FINAL_WAVE:
+			_end_screen(true)
+		else:
+			_offer_upgrade()
+
+func _drop_tomato() -> void:
+	tomatoes_dropped += 1
+	var pickup := TOMATO_PICKUP_SCENE.instantiate()
+	var b := GameManager.arena_bound - Vector2(140, 140)
+	pickup.position = Vector2(randf_range(-b.x, b.x), randf_range(-b.y, b.y))
+	add_child.call_deferred(pickup)
 
 func _on_health_changed(hp: float, max_hp: float) -> void:
 	hp_label.text = "%d/%d" % [int(hp), int(max_hp)]
@@ -230,31 +473,73 @@ func _on_health_changed(hp: float, max_hp: float) -> void:
 		hp_fill.color = MEAT_RED
 
 func _on_player_died() -> void:
+	_end_screen(false)
+
+func _end_screen(win: bool) -> void:
 	spawn_timer.stop()
-	GameManager.play("game_over")
+	GameManager.play("upgrade" if win else "game_over")
 	get_tree().paused = true
 
-	var panel := _make_panel(Vector2(820, 460))
+	var panel := _make_panel(Vector2(920, 600))
 
-	var title := _make_label("Game Over", FONT_TITLE, 110, MEAT_RED)
+	var title := _make_label("VICTORY" if win else "GAME OVER", FONT_TITLE, 110, CREAM if win else MEAT_RED)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	title.offset_top = 30
+	title.offset_top = 25
 	panel.add_child(title)
 
-	var sub := _make_label("You survived %d waves" % (wave - 1), FONT_PIXEL, 42, CREAM)
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	sub.offset_top = 200
-	panel.add_child(sub)
+	var quip_text: String = LINES_WIN.pick_random() if win else LINES_LOSE.pick_random()
+	var quip := _make_label(quip_text, FONT_PIXEL, 24, Color(0.78, 0.78, 0.84))
+	quip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	quip.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	quip.offset_top = 205
+	panel.add_child(quip)
 
-	var restart := _make_button("Play again", Vector2(400, 90))
-	restart.position = Vector2((panel.size.x - 400) / 2.0, 310)
-	restart.pressed.connect(func():
-		get_tree().paused = false
-		get_tree().reload_current_scene()
+	var survived := wave if win else wave - 1
+	var stats := _make_label("Protests: %d    Grilled: %d    Eaten: %d" % [survived, GameManager.score, GameManager.meat_eaten], FONT_PIXEL, 30, CREAM)
+	stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	stats.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	stats.offset_top = 275
+	panel.add_child(stats)
+
+	var prev_best := GameManager.best_wave
+	GameManager.record_wave(survived)
+	var best_txt := "NEW BEST!" if survived > prev_best else "Best: Protest %d" % GameManager.best_wave
+	var best := _make_label(best_txt, FONT_PIXEL, 24, Color(0.95, 0.8, 0.35))
+	best.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	best.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	best.offset_top = 322
+	panel.add_child(best)
+	if survived > prev_best:
+		var bt := best.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		bt.set_loops()
+		bt.tween_property(best, "modulate:a", 0.4, 0.4)
+		bt.tween_property(best, "modulate:a", 1.0, 0.4)
+
+	var steak := Sprite2D.new()
+	steak.texture = preload("res://assets/images/weapon/steak.png")
+	steak.scale = Vector2(4, 4)
+	steak.position = Vector2(panel.size.x - 105, -220)
+	steak.rotation = 0.35
+	panel.add_child(steak)
+	var st := steak.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	st.tween_property(steak, "position:y", panel.size.y - 88.0, 0.6).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	st.tween_callback(func():
+		var wob := steak.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		wob.set_loops()
+		wob.tween_property(steak, "rotation", 0.5, 0.9).set_trans(Tween.TRANS_SINE)
+		wob.tween_property(steak, "rotation", 0.2, 0.9).set_trans(Tween.TRANS_SINE)
 	)
+
+	var restart := _make_button("Play again", Vector2(400, 85))
+	restart.position = Vector2((panel.size.x - 400) / 2.0, 370)
+	restart.pressed.connect(func(): Transition.swipe_to(""))
 	panel.add_child(restart)
+
+	var menu_btn := _make_button("Back to menu", Vector2(400, 75))
+	menu_btn.position = Vector2((panel.size.x - 400) / 2.0, 480)
+	menu_btn.pressed.connect(func(): Transition.swipe_to("res://assets/scenes/intro.tscn"))
+	panel.add_child(menu_btn)
 
 func _offer_upgrade() -> void:
 	await get_tree().create_timer(1.5).timeout

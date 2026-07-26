@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d17bjeowqq6eh"]
 
-[ext_resource type="Script" uid="uid://ct3eg4ckxvbtt" path="res://Assets/scripts/enemy.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://2wp2tgtvcyjc" path="res://Assets/images/character/loose_sprites_gbstudio-removebg-preview.png" id="2_c5avr"]
+[ext_resource type="Script" uid="uid://ct3eg4ckxvbtt" path="res://assets/scripts/enemy.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://2wp2tgtvcyjc" path="res://assets/images/character/loose_sprites_gbstudio-removebg-preview.png" id="2_c5avr"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c5avr"]
 radius = 6.0
@@ -371,7 +371,7 @@ animations = [{
 }]
 
 [node name="Enemy" type="CharacterBody2D" unique_id=1330416622]
-scale = Vector2(3, 3)
+scale = Vector2(4, 4)
 collision_layer = 2
 script = ExtResource("1")
 

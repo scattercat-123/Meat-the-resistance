@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6xny0s8e3tbo"
-path="res://.godot/imported/noun-fast-backward-2009518.png-7abbd92a0149a83aa4ff7bf4e81de623.ctex"
+uid="uid://b7ca5oen6ufw4"
+path="res://.godot/imported/tofu_chunk.png-0fffe13559422e7811e357b4de3c455f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/noun-fast-backward-2009518.png"
-dest_files=["res://.godot/imported/noun-fast-backward-2009518.png-7abbd92a0149a83aa4ff7bf4e81de623.ctex"]
+source_file="res://assets/images/weapon/tofu_chunk.png"
+dest_files=["res://.godot/imported/tofu_chunk.png-0fffe13559422e7811e357b4de3c455f.ctex"]
 
 [params]
 
