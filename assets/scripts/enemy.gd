@@ -13,6 +13,7 @@ const DASH_SPEED := 700.0
 const DASH_TIME := 0.3
 const TELEGRAPH_TIME := 0.65
 
+var damage_bonus = 0
 var last_animation_state = ""
 var health := 0.0
 var target: Node2D
@@ -31,6 +32,7 @@ var dash_timer: Timer
 func _ready() -> void:
 	randomize()
 	health = max_health
+	contact_damage += damage_bonus
 	target = get_tree().get_first_node_in_group("player")
 	change_state_timer.wait_time = randf_range(3, 5)
 	change_state_timer.start()
@@ -70,6 +72,7 @@ func apply_knockback(dir: Vector2, force: float) -> void:
 func take_damage(amount: float, from := Vector2.INF) -> void:
 	if dying:
 		return
+	_end_dash()
 	health -= amount
 	GameManager.play("hit")
 	if from != Vector2.INF:
@@ -78,7 +81,6 @@ func take_damage(amount: float, from := Vector2.INF) -> void:
 	_squash()
 	_spawn_damage_number(amount)
 	_spawn_splatter()
-	_end_dash()
 	if health <= 0:
 		die()
 		
@@ -130,6 +132,7 @@ func _spawn_splatter() -> void:
 	get_tree().create_timer(0.6).timeout.connect(p.queue_free)
 
 func die() -> void:
+	_end_dash()
 	dying = true
 	collision_layer = 0
 	contact_damage = 0.0
@@ -141,7 +144,6 @@ func die() -> void:
 	tw.tween_property(sprite, "scale", Vector2(1.7, 1.7), 0.16)
 	tw.tween_property(self, "modulate:a", 0.0, 0.16)
 	tw.chain().tween_callback(queue_free)
-	_end_dash()
 
 func _on_change_state_timer_timeout() -> void:
 	change_state_timer.wait_time = randf_range(3, 5)
@@ -180,15 +182,15 @@ func change_state():
 	var rand = randi_range(1,3)
 	if rand == 1:
 		follow = true
-		contact_damage = 10
+		contact_damage = 10 + damage_bonus
 	elif rand == 2:
 		follow = false
 		velocity = Vector2.ZERO
 		idle(last_animation_state)
-		contact_damage = 15
+		contact_damage = 15 + damage_bonus
 	elif rand == 3:
 		follow = true
-		contact_damage = 0
+		contact_damage = 0 + damage_bonus
 
 func apply_slow(factor: float, duration: float) -> void:
 	speed = base_speed * factor

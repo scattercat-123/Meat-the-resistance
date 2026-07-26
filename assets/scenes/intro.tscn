@@ -2,11 +2,11 @@
 
 [ext_resource type="FontFile" uid="uid://r7gwhsuio0da" path="res://Assets/fonts/Singsong.otf" id="1_egymn"]
 [ext_resource type="VideoStream" uid="uid://1egkxnf6at38" path="res://Assets/images/200YEA_1.ogv" id="1_rckak"]
+[ext_resource type="Script" uid="uid://v41oyhv7ds0i" path="res://Assets/scripts/intro.gd" id="1_ts36g"]
 [ext_resource type="Texture2D" uid="uid://ingjyfwfde6x" path="res://Assets/images/HumanSteak_Raw.png" id="2_w8vp1"]
 [ext_resource type="Texture2D" uid="uid://v0f5k71vray0" path="res://Assets/images/cibercafe_enigma_front_06_asepritefile-spritesheet.png" id="3_rckak"]
 [ext_resource type="FontFile" uid="uid://de8lrrx0a8d71" path="res://Assets/fonts/pixelart.ttf" id="4_ts36g"]
 [ext_resource type="Script" uid="uid://cief84a7ysoyp" path="res://Assets/scripts/menu.gd" id="4_w8vp1"]
-[ext_resource type="PackedScene" uid="uid://bx8t58svlciqx" path="res://Assets/scenes/music.tscn" id="7_ts36g"]
 
 [sub_resource type="Animation" id="Animation_58f7j"]
 length = 0.001
@@ -248,6 +248,7 @@ size = Vector2(629, 81)
 size = Vector2(637, 92)
 
 [node name="Intro" type="Node2D" unique_id=810112856]
+script = ExtResource("1_ts36g")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1028948397]
 libraries/ = SubResource("AnimationLibrary_5qfp7")
@@ -400,8 +401,6 @@ offset_right = 1920.0
 offset_bottom = 1080.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0)
-
-[node name="Music" parent="." unique_id=429765256 instance=ExtResource("7_ts36g")]
 
 [connection signal="mouse_entered" from="Menu/Play/play area" to="Menu" method="_on_play_area_mouse_entered"]
 [connection signal="mouse_exited" from="Menu/Play/play area" to="Menu" method="_on_play_area_mouse_exited"]

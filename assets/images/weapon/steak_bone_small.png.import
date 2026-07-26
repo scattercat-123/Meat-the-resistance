@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cq86lo58o0rsx"
-path="res://.godot/imported/steak_bone_small.png-d5e8ab2e5e1d703d37f417953c06977f.ctex"
+path="res://.godot/imported/steak_bone_small.png-bcfebf6939fc067c019a077c202e6b1a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/weapon/steak_bone_small.png"
-dest_files=["res://.godot/imported/steak_bone_small.png-d5e8ab2e5e1d703d37f417953c06977f.ctex"]
+source_file="res://Assets/images/weapon/steak_bone_small.png"
+dest_files=["res://.godot/imported/steak_bone_small.png-bcfebf6939fc067c019a077c202e6b1a.ctex"]
 
 [params]
 
