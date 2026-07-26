@@ -417,7 +417,7 @@ func apply_slow(factor: float, duration: float) -> void:
 	speed = base_speed * factor
 	sprite.modulate = Color(0.6, 0.75, 1.0)
 	get_tree().create_timer(duration).timeout.connect(func():
-		if not dying and is_instance_valid(self):
+		if is_instance_valid(self) and not dying:
 			speed = base_speed
 			sprite.modulate = Color.WHITE
 	)

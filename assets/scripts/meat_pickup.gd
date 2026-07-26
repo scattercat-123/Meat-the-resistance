@@ -9,9 +9,9 @@ func _ready() -> void:
 	tw.tween_property(self, "position:y", position.y, 0.7).set_trans(Tween.TRANS_SINE)
 	body_entered.connect(_on_body_entered)
 
-	var rot := get_tree().create_timer(10.0)
+	var rot := get_tree().create_timer(10.0, false)
 	rot.timeout.connect(func():
-		if taken or not is_instance_valid(self):
+		if not is_instance_valid(self) or taken:
 			return
 		var blink := create_tween()
 		blink.set_loops(5)
