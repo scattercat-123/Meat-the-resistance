@@ -19,6 +19,7 @@ const TRACKS := [
 var order := []
 var idx := 0
 var paused := false
+var volume_linear := 1.0
 var held := false
 var ui_layer: CanvasLayer
 var player: AudioStreamPlayer
@@ -133,6 +134,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.physical_keycode:
 			KEY_M: _toggle_pause()
 			KEY_N: _next()
+
+func set_volume(v: float) -> void:
+	volume_linear = clampf(v, 0.0, 1.0)
+	if volume_linear <= 0.01:
+		player.volume_db = -80.0
+	else:
+		player.volume_db = -10.0 + linear_to_db(volume_linear)
 
 func force_track(track_name: String) -> void:
 	for t in TRACKS:

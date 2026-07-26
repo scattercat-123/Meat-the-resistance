@@ -18,6 +18,7 @@ const SFX := {
 	"burp": preload("res://assets/audio/burp.wav"),
 }
 
+var sfx_volume := 1.0
 var score := 0
 var meat_eaten := 0
 var enemies_alive := 0
@@ -62,10 +63,12 @@ func _ready() -> void:
 		_voices.append(p)
 
 func play(sound: String, volume_db := 0.0) -> void:
+	if sfx_volume <= 0.01:
+		return
 	for p in _voices:
 		if not p.playing:
 			p.stream = SFX[sound]
-			p.volume_db = volume_db
+			p.volume_db = volume_db + linear_to_db(sfx_volume)
 			p.play()
 			return
 
