@@ -27,3 +27,4 @@ mono_crash.*.json
 .notes/
 /*.gd
 /*.gd.uid
+build/
