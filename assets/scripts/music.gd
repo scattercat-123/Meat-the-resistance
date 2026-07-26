@@ -134,6 +134,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_M: _toggle_pause()
 			KEY_N: _next()
 
+func force_track(track_name: String) -> void:
+	for t in TRACKS:
+		if t.name == track_name:
+			player.stream = t.stream
+			player.play()
+			paused = false
+			player.stream_paused = false
+			pause_btn.texture_normal = ICON_PAUSE
+			name_label.text = t.name
+			return
+
 func _play_current() -> void:
 	player.stream = TRACKS[order[idx]].stream
 	player.play()

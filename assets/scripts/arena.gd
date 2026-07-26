@@ -21,6 +21,7 @@ const UPGRADES := [
 ]
 
 const TOMATO_PICKUP_SCENE := preload("res://assets/scenes/tomato_pickup.tscn")
+const BOSS_SCENE := preload("res://assets/scenes/boss.tscn")
 const TOMATO_WAVE := 6
 const FINAL_WAVE := 10
 
@@ -36,7 +37,7 @@ const LINES_WIN := [
 	"The resistance has been MEATED.",
 	"Vegans: 0 - Steak: everything.",
 	"You grilled your way to freedom.",
-	"Word is their Supreme Tofu leader escaped...",
+	"Their Supreme Tofu leader is now a side dish.",
 ]
 const SHOUTS := ["MURDERER!", "HOW COULD YOU", "THINK OF THE CARROTS", "SHAME!", "GO VEGAN!", "MONSTER!"]
 
@@ -283,6 +284,18 @@ func _random_shout() -> void:
 
 func _start_wave() -> void:
 	wave += 1
+	if wave == FINAL_WAVE:
+		wave_label.text = "FINAL PROTEST"
+		wave_size = 12
+		wave_kills = 0
+		tomatoes_dropped = 0
+		signs_this_wave = 2
+		GameManager.max_dash_slots = 2
+		GameManager.dash_slots = 2
+		GameManager.max_lob_slots = 2
+		GameManager.lob_slots = 2
+		_spawn_boss()
+		return
 	wave_label.text = "Protest %d" % wave
 	enemies_to_spawn = 3 + wave
 	GameManager.max_dash_slots = 0 if wave < 3 else mini(1 + int((wave - 3) / 3.0), 3)
@@ -294,6 +307,25 @@ func _start_wave() -> void:
 	tomatoes_dropped = 0
 	signs_this_wave = 0
 	spawn_timer.start()
+
+func _spawn_boss() -> void:
+	Music.force_track("Heavy Doom")
+	var boss := BOSS_SCENE.instantiate()
+	boss.global_position = Vector2(0, -720)
+	add_child(boss)
+	GameManager.enemies_alive += 1
+
+	var ann := _make_label("IL TOFU SUPREMO", FONT_TITLE, 120, Color(0.95, 0.92, 0.85))
+	ann.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	ann.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ann.offset_top = 380
+	ann.modulate.a = 0.0
+	hud.add_child(ann)
+	var tw := ann.create_tween()
+	tw.tween_property(ann, "modulate:a", 1.0, 0.5)
+	tw.tween_interval(1.6)
+	tw.tween_property(ann, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(ann.queue_free)
 
 func _spawn_one() -> void:
 	if enemies_to_spawn <= 0:
